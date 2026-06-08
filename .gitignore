@@ -1,0 +1,56 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.so
+.pytest_cache/
+
+# Data & models
+*.pt
+*.pth
+*.pkl
+*.h5
+thesis-code/data/processed/
+runs/
+checkpoints/
+
+# LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.pdf
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Env vars
+.env
+*.envthesis-code/data/**/*.csv
+
+# datasets
+thesis-code/data/raw/
+thesis-code/data/processed/
+
+# outputs
+thesis-code/outputs/*.png
+
+# python
+__pycache__/
+*.pyc

@@ -1,0 +1,153 @@
+%% ---------------------------------------------------------------
+%%  Pager – Proyecto Final de Ciencias de la Computación – UTEC
+%%  Segovia Ureta, Gianpier | Lazo Mera, Kalos
+%%  Asesor: Martinez Abaunza, Victor Eduardo
+%% ---------------------------------------------------------------
+\documentclass[a4paper,11pt]{article}
+
+%% Paquetes mínimos
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage[top=2.2cm,bottom=2.2cm,left=2.5cm,right=2.5cm]{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}      % tablas más elegantes
+\usepackage{array}
+\usepackage{parskip}       % espaciado entre párrafos en lugar de sangría
+\usepackage{titlesec}      % control de secciones
+\usepackage{enumitem}
+%% Reducir espacio vertical de secciones
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+\titlespacing*{\subsection}{0pt}{6pt}{3pt}
+
+\hypersetup{colorlinks=true, urlcolor=blue, linkcolor=black}
+
+%% ---------------------------------------------------------------
+\begin{document}
+
+%% Encabezado manual (sin maketitle para ahorrar espacio)
+\begin{center}
+  {\large\bfseries Mitigación de la Resistencia Evolutiva en Glioblastoma\\
+  Multiforme mediante MARL Adversarial: Optimización de\\
+  Políticas Adaptativas bajo un Framework MAPPO-CTDE\\
+  y Simulación Calibrada}\\[8pt]
+  {\small Segovia Ureta, Gianpier \quad|\quad Lazo Mera, Kalos}\\
+  {\small Asesor: Martinez Abaunza, Victor Eduardo}\\
+  {\small Lima, 15 de Abril de 2026}
+\end{center}
+
+\vspace{4pt}
+\hrule
+\vspace{8pt}
+
+%% ---------------------------------------------------------------
+\section{Título del Proyecto}
+
+Mitigación de la Resistencia Evolutiva en Glioblastoma Multiforme mediante
+MARL Adversarial: Optimización de Políticas Adaptativas bajo un Framework
+MAPPO-CTDE y Simulación Calibrada.
+
+%% ---------------------------------------------------------------
+\section{Planteamiento del Problema}
+
+Los protocolos de dosificación estáticos, lineales y agresivos son incapaces de adaptarse a la
+dinámica evolutiva del cáncer. Al aplicar dosis fijas, la selección natural
+elimina las células sensibles y favorece la proliferación de clones resistentes,
+reduciendo drásticamente la ventana terapéutica del paciente.
+
+Desde la perspectiva computacional, este es un problema de \textbf{optimización
+dinámica en un entorno adversarial}: el sistema (el tumor) modifica sus reglas
+de transición de estado en respuesta a cada acción terapéutica. Las estrategias
+estáticas convergen a mínimos locales donde la recompensa del tratamiento cae a
+cero, equivalente a la resistencia clínica completa.
+
+La propuesta es un \textbf{Framework de Simulación Co-evolutiva} basado en
+Aprendizaje por Refuerzo Multi-Agente (MARL) con el esquema MAPPO-CTDE
+(Centralized Training, Decentralized Execution). Dos agentes compiten: el
+\textit{Agente Terapia} optimiza la dosificación adaptativa, mientras que el
+\textit{Agente Cáncer} actúa como adversario que modela la presión evolutiva,
+forzando al primero a anticipar la resistencia en lugar de solo reaccionar.
+
+%% ---------------------------------------------------------------
+\section{Objetivo General}
+
+Diseñar e implementar un framework de simulación co-evolutiva basado en MARL
+adversarial (MAPPO-CTDE) que aprenda políticas de dosificación adaptativa para
+el tratamiento de Glioblastoma Multiforme, minimizando la aparición de
+resistencia farmacológica mediante la anticipación de la dinámica evolutiva
+tumoral, y validando su desempeño frente al protocolo estándar de dosis máxima
+tolerada sobre un entorno de simulación calibrado con datos biológicos reales.
+
+%% ---------------------------------------------------------------
+\section{Trabajos Relacionados}
+
+\begin{enumerate}[leftmargin=*, itemsep=3pt, topsep=2pt]
+
+  \item \textbf{Kratz \& Adamczyk (2025)} -- \textit{Reinforcement Learning for
+  Control of Non-Markovian Cellular Population Dynamics}. ICLR 2025 /
+  NeurIPS ML4PS Workshop 2024. arXiv:2410.08439. El trabajo más cercano al
+  propuesto: un agente RL entrena en un entorno Gymnasium de poblaciones
+  celulares sensibles/resistentes con dinámica no-markoviana, aprendiendo
+  protocolos de dosificación adaptativos. Valida la viabilidad del
+  enfoque RL en este dominio y sirve como baseline metodológico directo.
+
+  \item \textbf{Mashayekhi et al. (2024)} -- \textit{Deep Reinforcement
+  Learning-Based Control of Chemo-Drug Dose in Cancer Treatment}.
+  \textit{Comput. Methods Programs Biomed.}, 243, 107884. Controlador DRL
+  para dosificación de quimioterapia evaluado sobre pacientes simulados con
+  espacios de estado y acción continuos; referencia de comparación directa
+  (agente único) que nuestro framework adversarial busca superar.
+
+  \item \textbf{Li et al. (2025)} -- \textit{Optimal Adaptive Cancer Therapy
+  Based on Evolutionary Game Theory}. \textit{PLOS ONE}, 20(4): e0320677.
+  Incorpora farmacocinética en un modelo de teoría de juegos evolutivos e
+  identifica estrategias óptimas de terapia adaptativa mediante el Principio
+  de Mínimo de Pontryagin. Fundamenta matemáticamente el modelo de
+  competencia celular calibrado con GDSC y ecuaciones de Lotka-Volterra.
+
+  \item \textbf{Salvioli et al. (2024)} -- \textit{Stackelberg Evolutionary
+  Games of Cancer Treatment}. \textit{Dynamic Games Appl.}
+  DOI:10.1007/s13235-024-00609-z. Modela el tratamiento oncológico como un
+  juego de Stackelberg médico--cáncer donde el tumor responde evolucionando
+  resistencia; establece la base teórica del esquema adversarial que
+  implementamos con MARL en lugar de control óptimo clásico.
+
+  \item \textbf{Yu et al. (2022)} -- \textit{The Surprising Effectiveness of
+  PPO in Cooperative Multi-Agent Games (MAPPO)}. NeurIPS 2022.
+  arXiv:2103.01955. Paper fundacional del algoritmo MAPPO-CTDE adoptado como
+  arquitectura central del framework: demuestra que PPO con crítico
+  centralizado logra rendimiento superior o comparable a métodos off-policy
+  más complejos en entornos multi-agente, con mínimo ajuste de
+  hiperparámetros.
+
+\end{enumerate}
+
+%% ---------------------------------------------------------------
+\section{Posibles Datasets}
+
+\begin{center}
+\small
+\begin{tabular}{>{\bfseries}p{3.2cm} p{4.8cm} p{3.2cm}}
+\toprule
+Tipo de dato & Fuente & Uso en el proyecto \\
+\midrule
+Sensibilidad química &
+  GDSC / NCI-60 &
+  Calibrar el daño del fármaco sobre cada línea celular \\
+Perfiles ómicos &
+  CCLE (Cancer Cell Line Encyclopedia) &
+  Definir el espacio de estados genómicos del tumor \\
+Estructura molecular &
+  SMILES via PubChem &
+  Representar fármacos para el Agente Terapia \\
+Dinámica poblacional &
+  Modelos ODE (Lotka-Volterra, generado) &
+  Simular competencia células sensibles vs.\ resistentes \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+{\footnotesize Todos los datasets listados son de acceso público y se
+encuentran disponibles para descarga directa en sus repositorios oficiales.}
+
+\end{document}
