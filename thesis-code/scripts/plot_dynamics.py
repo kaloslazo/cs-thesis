@@ -8,10 +8,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import matplotlib.pyplot as plt
-from gbmarl.config import Params
 from gbmarl.dynamics import simulate
+from gbmarl.config import load_calibration
 
-P = Params()
+P = load_calibration()
+
 STATE0 = [0.40, 0.01, 0.0]
 N_DIAS = 200
 
