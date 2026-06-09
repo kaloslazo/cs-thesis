@@ -16,8 +16,8 @@ def test_reset_devuelve_dos_agentes():
 
 def test_espacios_de_accion_correctos():
     env = TumorEnv(u_max=1.0, phi_max=0.05)
-    assert env.action_space("therapy").high[0] == 1.0      # dosis acotada
-    assert env.action_space("tumor").high[0] == 0.05       # transición acotada (decisión 7)
+    assert env.action_space("therapy").high[0] == 1.0
+    assert env.action_space("tumor").high[0] == 0.05      # transición acotada
 
 
 def test_rollout_aleatorio_no_crashea_y_respeta_horizonte():
@@ -27,7 +27,7 @@ def test_rollout_aleatorio_no_crashea_y_respeta_horizonte():
     while env.agents and pasos < 500:
         env.step(_random_actions(env))
         pasos += 1
-    assert pasos <= 180                                    # nunca pasa el horizonte
+    assert pasos <= 180
 
 
 def test_estado_nunca_negativo():
@@ -38,11 +38,13 @@ def test_estado_nunca_negativo():
         assert (obs["therapy"] >= 0).all()
 
 
-def test_recompensas_opuestas():
-    """Tumor premia sobrevivir (>=0); terapia penaliza tumor+toxicidad (<=0)."""
+def test_recompensa_premia_control_y_castiga_resistencia():
+    """Con tumor controlado y poca resistencia, la terapia recibe el bono de control;
+    el tumor nunca recibe recompensa negativa por su resistencia (>=0)."""
     env = TumorEnv()
     env.reset(seed=3)
-    obs, rew, *_ = env.step({"therapy": np.array([0.5], np.float32),
-                             "tumor": np.array([0.02], np.float32)})
-    assert rew["tumor"] >= 0
-    assert rew["therapy"] <= 0
+    obs, rew, term, trunc, info = env.step({"therapy": np.array([0.3], np.float32),
+                                            "tumor": np.array([0.01], np.float32)})
+    assert rew["therapy"] > 0          # día controlado -> bono positivo
+    assert rew["tumor"] >= 0           # resistencia siempre suma para el tumor
+    assert rew["therapy"] <= env.control_bonus   # no puede exceder el bono máximo

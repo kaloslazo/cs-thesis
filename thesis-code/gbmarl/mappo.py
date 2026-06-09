@@ -93,11 +93,19 @@ def _update(agent, opt, O, G, A, LP, ADV, RET, clip, epochs, mb, ent_coef, vf_co
 
 def train_mappo(env, total_timesteps=120000, n_steps=2048, lr=3e-4, gamma=0.99,
                 gae_lambda=0.95, clip=0.2, epochs=10, minibatch=64,
-                ent_coef=0.0, vf_coef=0.5, seed=0, verbose=True):
+                ent_coef=0.01, vf_coef=0.5, seed=0, centralized=True, verbose=True):
+    # Reproducibilidad: hilo único + sembrado completo (mismo seed -> mismo resultado)
     torch.manual_seed(seed); np.random.seed(seed)
+    torch.set_num_threads(1)
+    try:
+        torch.use_deterministic_algorithms(True)
+    except Exception:
+        pass
 
-    th = Agent(2, 3, 1, env.action_space("therapy").low, env.action_space("therapy").high)
-    tu = Agent(2, 3, 1, env.action_space("tumor").low, env.action_space("tumor").high)
+    # CTDE: critico ve estado global (3) si MAPPO; solo obs local (2) si IPPO
+    critic_dim = 3 if centralized else 2
+    th = Agent(2, critic_dim, 1, env.action_space("therapy").low, env.action_space("therapy").high)
+    tu = Agent(2, critic_dim, 1, env.action_space("tumor").low, env.action_space("tumor").high)
     opt_th = torch.optim.Adam(th.parameters(), lr=lr)
     opt_tu = torch.optim.Adam(tu.parameters(), lr=lr)
 
@@ -115,17 +123,19 @@ def train_mappo(env, total_timesteps=120000, n_steps=2048, lr=3e-4, gamma=0.99,
             o_th = torch.tensor(obs_therapy(state))
             o_tu = torch.tensor(obs_tumor(state))
             g = torch.tensor(global_state(state))
+            cin_th = g if centralized else o_th     # entrada al critico de terapia
+            cin_tu = g if centralized else o_tu     # entrada al critico de tumor
             with torch.no_grad():
-                raw_th, act_th, lp_th = th.act(o_th); v_th = th.value(g)
-                raw_tu, act_tu, lp_tu = tu.act(o_tu); v_tu = tu.value(g)
+                raw_th, act_th, lp_th = th.act(o_th); v_th = th.value(cin_th)
+                raw_tu, act_tu, lp_tu = tu.act(o_tu); v_tu = tu.value(cin_tu)
             actions = {"therapy": act_th.numpy(), "tumor": act_tu.numpy()}
             nobs, rew, term, trunc, _ = env.step(actions)
             done = (term.get("therapy", True) if term else True) or \
                    (trunc.get("therapy", True) if trunc else True)
 
-            for k, o, raw, lp, v, r in (("th", o_th, raw_th, lp_th, v_th, rew["therapy"]),
-                                        ("tu", o_tu, raw_tu, lp_tu, v_tu, rew["tumor"])):
-                buf[k]["O"].append(o); buf[k]["G"].append(g); buf[k]["A"].append(raw)
+            for k, o, cin, raw, lp, v, r in (("th", o_th, cin_th, raw_th, lp_th, v_th, rew["therapy"]),
+                                             ("tu", o_tu, cin_tu, raw_tu, lp_tu, v_tu, rew["tumor"])):
+                buf[k]["O"].append(o); buf[k]["G"].append(cin); buf[k]["A"].append(raw)
                 buf[k]["LP"].append(lp); buf[k]["V"].append(v); buf[k]["R"].append(r)
                 buf[k]["D"].append(done)
             ret_th += rew["therapy"]; ret_tu += rew["tumor"]; steps += 1
@@ -138,8 +148,9 @@ def train_mappo(env, total_timesteps=120000, n_steps=2048, lr=3e-4, gamma=0.99,
         # GAE + update por agente, con su crítico centralizado
         for agent, opt, k in ((th, opt_th, "th"), (tu, opt_tu, "tu")):
             o_last = obs_therapy(state) if k == "th" else obs_tumor(state)
+            cin_last = global_state(state) if centralized else o_last
             with torch.no_grad():
-                last_v = agent.value(torch.tensor(global_state(state)))
+                last_v = agent.value(torch.tensor(cin_last))
             O = torch.stack(buf[k]["O"]); G = torch.stack(buf[k]["G"])
             A = torch.stack(buf[k]["A"]); LP = torch.stack(buf[k]["LP"])
             V = torch.stack(buf[k]["V"])
