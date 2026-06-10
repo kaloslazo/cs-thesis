@@ -1,85 +1,87 @@
-\chapter{REVISIÓN CRÍTICA DE LA LITERATURA}
+\chapter{INTRODUCCIÓN}
+\label{cap:introduccion}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec porta neque. Curabitur cursus aliquam metus, id porttitor libero semper vel. Mauris risus metus, ultricies ut massa vitae, dignissim rhoncus arcu. Nam vulputate id sapien nec lacinia. Mauris non tempor est. Nam eget nunc augue. Morbi tincidunt leo at sapien finibus facilisis. Nullam commodo erat non tempor dictum.
+\section{Antecedentes}
+\label{sec:antecedentes}
 
-Duis convallis mauris eros. Interdum et malesuada fames ac ante ipsum primis in faucibus. Suspendisse et pellentesque tortor. Vivamus porttitor, lorem non interdum lacinia, ligula libero euismod diam, in commodo ipsum nibh a dui. Donec erat metus, suscipit quis suscipit at, condimentum et nunc. Phasellus ac felis euismod lectus mollis laoreet vel vehicula lorem. Quisque tincidunt turpis tempus odio tempus, vel interdum turpis auctor. Duis nec vulputate massa. Suspendisse egestas quis turpis non dictum. Proin et ultricies leo. Mauris posuere sagittis blandit. Pellentesque scelerisque rhoncus justo, nec interdum ante. Praesent finibus dictum lacus in pellentesque.
+El glioblastoma multiforme (GBM) es el tumor cerebral primario maligno más frecuente y agresivo en adultos, con un pronóstico sombrío: a pesar del tratamiento multidisciplinario, la mediana de supervivencia global se mantiene en torno a los 12 a 15 meses y la supervivencia a cinco años no supera el 7\,\%~\cite{Tan2020,Sipos2025,Adegboyega2021}. El estándar de cuidado, conocido como protocolo de Stupp, consiste en la resección quirúrgica máxima segura seguida de radioterapia con temozolomida (TMZ) concurrente y adyuvante~\cite{Stupp2005,Jezierzanski2024}. Sin embargo, prácticamente todos los pacientes recaen: el tumor progresa o recurre con resistencia a la TMZ, y en el escenario de recurrencia no existe un estándar de cuidado establecido~\cite{Fernandes2017,Tan2020}.
 
-Integer at lacus nisi. Proin eu elit mi. Proin interdum nulla vitae turpis tincidunt fermentum. Duis dui lorem, ornare vel metus sit amet, consequat lacinia ex. Cras ornare porta malesuada. Proin vehicula, velit a interdum malesuada, nulla diam accumsan urna, et efficitur ipsum mi id sapien. Vivamus accumsan aliquet leo ac interdum. Ut molestie purus a blandit ultricies. Aenean ornare eu mauris quis gravida. Nam molestie ullamcorper egestas. In hac habitasse platea dictumst. Nulla pulvinar orci tempor varius porttitor.
+Esta inevitabilidad de la recaída no es accidental, sino una consecuencia evolutiva del propio tratamiento. La administración a dosis máxima tolerada (MTD) ejerce una intensa presión selectiva que favorece la expansión de los subclones resistentes; al eliminar a las células sensibles se libera a las resistentes de la competencia por los recursos, acelerando su dominancia~\cite{Gatenby2022}. Frente a este fenómeno, la terapia adaptativa propone un cambio de paradigma: en lugar de buscar erradicar el tumor, busca \emph{contenerlo}, modulando la dosis para preservar deliberadamente una población sensible que compita con la resistente y retrase su expansión~\cite{Gallaher2017,Strobl2020}. Este enfoque, validado clínicamente en cáncer de próstata metastásico, prolongó significativamente el tiempo a progresión usando menos de la mitad de la dosis acumulada~\cite{Zhang2017}.
 
-\section{Sección 1}
+El reto, no obstante, es \emph{diseñar} el cronograma adaptativo óptimo. Dos líneas de investigación han abordado el problema desde ángulos complementarios. Por un lado, el aprendizaje por refuerzo (RL) ha demostrado poder descubrir políticas de dosificación que superan a los protocolos adaptativos heurísticos~\cite{Gallagher2024}. Por otro, la teoría de juegos ha formalizado el tratamiento como un juego de Stackelberg en el que el oncólogo es el líder y el tumor el seguidor evolutivo~\cite{Stankova2019}. Esta tesis se sitúa en la intersección de ambas líneas y formula una pregunta concreta: ¿cómo modelar la respuesta evolutiva del tumor como un \emph{adversario que aprende}, de modo que el aprendizaje por refuerzo descubra políticas de dosificación adaptativa que retrasen la resistencia en el glioblastoma?
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras scelerisque quis augue malesuada porttitor. Phasellus tincidunt ipsum quis metus pellentesque commodo. Phasellus vitae metus arcu. Pellentesque scelerisque ac nulla laoreet mollis. Vivamus blandit, velit eget convallis eleifend, nibh risus congue sapien, tristique bibendum justo lorem eget arcu. Quisque mollis tristique tellus, sit amet hendrerit purus lacinia id. Fusce sed nunc arcu. Phasellus porttitor convallis ipsum, sit amet tempus nulla mattis a \cite{Reumann2012}.
+\section{Planteamiento del problema}
+\label{sec:problema}
 
-Sed eu orci feugiat, mollis nunc convallis, lobortis lorem. Suspendisse in lacinia magna, vel elementum tortor. Suspendisse hendrerit commodo justo, vitae posuere nisl eleifend at. Morbi vehicula risus ut diam tempus, ac dapibus erat euismod. Nunc quis elementum mi, et dictum nulla. Mauris rhoncus diam ac orci laoreet lobortis. Fusce et augue efficitur, dignissim dui ac, convallis est.
+El modelado computacional de la terapia adaptativa ha avanzado con rapidez, pero los enfoques actuales comparten una limitación en \emph{cómo representan la respuesta evolutiva del tumor}. Los métodos de RL para dosificación tratan al tumor como una dinámica fija sobre la que un único agente optimiza~\cite{Gallagher2024,Mashayekhi2023}: el tumor no anticipa ni responde estratégicamente. Las heurísticas de terapia adaptativa, aunque clínicamente exitosas, no se optimizan y aplican reglas fijas de encendido/apagado~\cite{Gallaher2017}. Los modelos teórico-de-juegos representan al tumor como un seguidor cuya respuesta se resuelve analíticamente o se asume racional~\cite{Stankova2019,Salvioli2024}, lo que limita la riqueza de comportamientos adversariales que el modelo puede capturar.
 
+Esta omisión deja un conjunto recurrente de carencias. Las políticas resultantes no se entrenan contra el peor caso evolutivo, por lo que su robustez ante una respuesta tumoral estratégica queda sin verificar. Los modelos suelen ser genéricos o ilustrativos, sin calibración a datos reales de la enfermedad de interés. Y, de manera crítica, la evaluación tiende a recaer en métricas de carga tumoral aislada, que premian engañosamente la reducción agresiva del tumor ---precisamente la estrategia que induce la resistencia--- en lugar del desenlace clínico que importa: el tiempo durante el cual el tumor permanece manejable.
 
+Trabajos recientes se aproximan al problema desde ángulos vecinos. El RL profundo aplicado a la programación adaptativa~\cite{Gallagher2024} demuestra el valor de las políticas aprendidas, pero sin adversario. Los marcos de juegos evolutivos de Stackelberg~\cite{Salvioli2024,Karima2025} capturan la asimetría líder-seguidor, pero resuelven al tumor analíticamente y rara vez se calibran. El RL adversarial robusto (RARL) muestra que entrenar contra un adversario que aprende mejora la estabilidad y la robustez de la política~\cite{Pinto2017}. Aun así, ninguno de estos enfoques modela simultáneamente a la terapia y al tumor como agentes de RL profundo que co-evolucionan adversarialmente sobre un simulador de GBM calibrado con datos reales, ni somete a prueba rigurosa si el entrenamiento con información centralizada (CTDE) aporta sobre el aprendizaje independiente. Esta es la brecha que la tesis aborda, y enmarcamos nuestra contribución como complemento de los paradigmas de RL de agente único y de juegos analíticos, no como su competidor.
 
-\section{Segundo subtítulo}
+\section{Pregunta de investigación e hipótesis}
+\label{sec:pregunta}
 
-\subsection{División del segundo subtítulo}
+A partir de la brecha anterior, la tesis se guía por una pregunta de investigación central:
 
-En la actualidad, las unidades de información hacen frente a muchos cambios
-debido a los avances tecnológicos, explosión informativa, nuevos recursos y
-soportes, por lo cual se implementan servicios innovadores que les permitan a
-sus usuarios tener acceso a muchas fuentes de información. Para asegurar el
-acceso y uso de los servicios los usuarios requieren poseer una serie de
-habilidades que les permitan identificar, recuperar, manejar, discernir,
-organizar, utilizar y comunicar la información de manera eficaz para la toma de
-decisiones. La relación entre $a$ y $b$ puede expresarse como
-%
-\begin{equation}
-  \label{eq:1}
-  a+b=\sqrt{\frac{4}{3}},
-\end{equation}
-%
-donde $a$ y $b$ son escalares.
+\begin{quote}
+\emph{¿En qué medida modelar el glioblastoma como un juego adversarial de dos agentes ---terapia y tumor--- resuelto mediante aprendizaje por refuerzo multiagente sobre un simulador calibrado con datos reales permite descubrir políticas de dosificación adaptativa que retrasen el tiempo hasta la dominancia resistente, en comparación con la dosis máxima tolerada y la heurística adaptativa de Gatenby; y aporta el crítico centralizado (CTDE) una ventaja sobre el aprendizaje independiente (IPPO) en este dominio?}
+\end{quote}
 
-Entre las causas se pueden considerar la falta de tiempo asignado al taller,
-las limitaciones en cuanto a laboratorios, el poco personal, la falta de una
-correcta selección de los contenidos, así como, una calificación que asegure el
-cumplimiento de los objetivos. Un ejemplo de cómo poner una figura se muestra en la Fig. \ref{fig:diagram2}, y es importante recordar la relación mostrada en \eqref{eq:1}.
+Planteamos la hipótesis de que una política de terapia entrenada en \emph{self-play} adversarial contra un tumor que también aprende extiende el tiempo de manejo clínico exitoso ---definido como el número de días en que el tumor permanece simultáneamente controlado en carga y mayoritariamente tratable--- por encima tanto de la dosis máxima tolerada como de la heurística de Gatenby, de forma estadísticamente significativa sobre múltiples réplicas. Asimismo, planteamos que el mecanismo descubierto corresponde a una dosificación intermitente que preserva la competencia de las células sensibles, y caracterizamos empíricamente si el crítico centralizado mejora la fiabilidad del entrenamiento frente al aprendizaje independiente.
 
+La hipótesis solo es contrastable si la evaluación no es engañosa: la métrica de éxito debe reflejar el desenlace clínico real y no la mera reducción de la carga. Por ello adoptamos una métrica de progresión auditada ---el tiempo a falla combinado, que termina el episodio cuando el tumor deja de estar controlado \emph{o} deja de ser tratable, reportando el motivo de falla--- en lugar de una métrica de carga aislada. Esta separación se incorpora por diseño y se detalla en el Capítulo~\ref{cap:metodologia}.
 
-\begin{figure} 
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[height=3cm]{images/logo_utec.png} &
-\includegraphics[height=2cm]{images/logo_utec.png} \\
-(a) & (b)
-\end{tabular}
-\caption{\label{fig:diagram2}Scheme showing the architecture of a generic kinematic task. (a) Logo en tamaño de 3 centímetros. (b) Logo en tamaño de 2 centímetros.}
-\end{center}
-\end{figure}
+\section{Objetivos}
+\label{sec:objetivos}
 
+\subsection{Objetivo general}
+\label{subsec:objetivo-general}
 
-\section{Tercer subtítulo}
+Diseñar un marco de aprendizaje por refuerzo multiagente adversarial ---GBMARL--- que modele la terapia y la resistencia evolutiva del glioblastoma como agentes en competencia sobre un simulador calibrado con datos reales, y evaluarlo cuantificando su capacidad para descubrir políticas de dosificación adaptativa que retrasen la intratabilidad frente a líneas base clínicas establecidas.
 
-\subsection{División del tercer subtítulo}
+\subsection{Objetivos específicos}
+\label{subsec:objetivos-especificos}
 
-En la actualidad, las unidades de información hacen frente a muchos cambios
-debido a los avances tecnológicos, explosión informativa, nuevos recursos y
-soportes, por lo cual se implementan servicios innovadores que les permitan a
-sus usuarios tener acceso a muchas fuentes de información. Para asegurar el
-acceso y uso de los servicios los usuarios requieren poseer una serie de
-habilidades que les permitan identificar, recuperar, manejar, discernir,
-organizar, utilizar y comunicar la información de manera eficaz para la toma de
-decisiones.
+El objetivo general se descompone en cuatro objetivos específicos que organizan el trabajo metodológico de la tesis:
 
-Entre las causas se pueden considerar la falta de tiempo asignado al taller,
-las limitaciones en cuanto a laboratorios, el poco personal, la falta de una
-correcta selección de los contenidos, así como, una calificación que asegure el
-cumplimiento de los objetivos.
+\begin{enumerate}
+  \item Construir y calibrar un simulador de la dinámica tumoral sensible--resistente, basado en ecuaciones diferenciales ordinarias de competencia tipo Lotka-Volterra acopladas a la farmacodinámica de la temozolomida~\cite{Strobl2020,Yin2019}. La potencia del fármaco (concentración inhibitoria media y la brecha de sensibilidad entre poblaciones) se deriva de datos reales de sensibilidad de líneas celulares de GBM (GDSC2~\cite{GDSC} y DepMap~\cite{DepMap}), mientras que el techo de muerte celular se ancla a la literatura. Este objetivo actúa como compuerta de validación: el simulador debe reproducir el fracaso evolutivo de la dosis máxima tolerada por selección de resistencia.
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{c|c}
-        Tiempo($s$) & Distancia($m$) \\
-        \hline
-        10 & 23 \\
-        20 & 33 \\
-        30 & 43 \\
-        40 & 53 \\
-    \end{tabular}
-    \caption{Tiempos versus distancia.}
-    \label{tab:tiempo_versus_distancia}
-\end{table}
+  \item Formular el entorno de decisión multiagente con observabilidad parcial clínicamente justificada ---donde el agente de terapia no observa directamente la fracción resistente, replicando la limitación del oncólogo--- y una función de recompensa que optimice el desenlace clínico real (días con tumor controlado y tratable); e implementar el algoritmo MAPPO con entrenamiento centralizado y ejecución descentralizada (CTDE), junto con su variante de críticos independientes (IPPO)~\cite{Amato2024,deWitt2020}.
+
+  \item Entrenar y validar las políticas aprendidas con múltiples semillas, reportando la significancia estadística de la mejora frente a las líneas base (dosis máxima tolerada y heurística de Gatenby) mediante una métrica de progresión auditada por modo de falla; e interpretar el mecanismo de la política resultante a partir de la trayectoria de dosificación.
+
+  \item Aislar la contribución del crítico centralizado mediante una ablación controlada de CTDE frente a IPPO, y evaluar la sensibilidad del resultado a las constantes de calibración, para establecer en qué condiciones y por qué importa cada componente del marco.
+\end{enumerate}
+
+\section{Motivación}
+\label{sec:motivacion}
+
+Lo que justifica este trabajo no es solo la brecha identificada, sino la dificultad de cerrarla. El entrenamiento adversarial por \emph{self-play} es intrínsecamente inestable: la co-evolución de dos agentes puede asentarse en distintos equilibrios según la inicialización, produciendo resultados bimodales que exigen un protocolo de reproducibilidad y de reporte por tasa de éxito en lugar de promedios engañosos. Calibrar un simulador a partir de datos de sensibilidad \emph{in vitro} con el fin de optimizar un objetivo de \emph{control} dinámico es igualmente delicado, pues los datos informan la potencia del fármaco pero no la dinámica de competencia. Hacer que el entrenamiento sea estable, reproducible y honestamente evaluado constituye el núcleo técnico de la tesis.
+
+La evaluación tiene un peso equivalente. La métrica de tiempo a falla combinado es clínicamente honesta por construcción: evita la trampa de premiar la reducción agresiva del tumor ---que minimiza la carga a corto plazo pero acelera la resistencia--- y mide en cambio el desenlace que de verdad importa. El beneficio esperado es práctico: una política adaptativa que retrase de forma robusta la dominancia resistente puede informar el diseño de cronogramas de temozolomida, y el marco es trasladable, en principio, a otros tumores gobernados por dinámicas evolutivas de resistencia.
+
+\section{Alcance y limitaciones}
+\label{sec:alcance}
+
+Para mantener el argumento limpio y el trabajo dentro de un presupuesto de cómputo realista de pregrado, la tesis acota deliberadamente su alcance. El estudio es una validación \emph{in silico} sobre un simulador calibrado \emph{in vitro}, no una validación clínica. Nos centramos en el glioblastoma tratado con un único agente (temozolomida) y en un modelo no espacial de dos poblaciones (sensible y resistente); las extensiones a tratamientos combinados, a modelos espaciales y a otras histologías quedan como trabajo futuro. La calibración se realiza sobre el subconjunto de líneas celulares de GBM con genómica y ensayos completos disponibles, y la resistencia se modela como una transición fenotípica controlable ---respaldada por la evidencia de plasticidad fenotípica reversible~\cite{Boumahdi2019}--- en lugar de una mutación irreversible explícita. El entrenamiento se ejecuta en CPU con un hilo único para garantizar la reproducibilidad determinista, a costa de la velocidad.
+
+Una limitación de fondo es que, con la calibración realista del glioblastoma, la resistencia resulta inevitable bajo cualquier estrategia que trate el tumor; esto refleja la realidad clínica de la enfermedad y delimita el objetivo de la tesis: \emph{retrasar} la intratabilidad, no curar ni eliminar el tumor. Reportamos además dos limitaciones de forma honesta: el entrenamiento adversarial exhibe bimodalidad, por lo que la tasa de éxito de contención prolongada no alcanza el 100\,\% de las réplicas; y el agente tumoral dispone de una palanca de acción limitada, lo que acota su capacidad de constituir una amenaza adversarial fuerte. En consecuencia, no afirmamos que el crítico centralizado sea universalmente superior, sino que caracterizamos honestamente cuándo aporta. Estas exclusiones no son concesiones, sino fronteras principistas que marcan el régimen en el que la contribución se sostiene sobre bases tanto evolutivas como estadísticas.
+
+\section{Contribuciones}
+\label{sec:contribuciones}
+
+Esta tesis realiza las siguientes cuatro contribuciones, organizadas de la arquitectura a la evaluación:
+
+\begin{enumerate}
+  \item \textbf{Marco MARL adversarial calibrado (GBMARL).} Introducimos un marco que modela el tratamiento del glioblastoma como un juego adversarial de dos agentes ---terapia y tumor--- resuelto por aprendizaje por refuerzo multiagente. A diferencia de los enfoques de RL de agente único, que tratan al tumor como dinámica fija~\cite{Gallagher2024}, y de los marcos de juegos que resuelven al tumor analíticamente~\cite{Stankova2019,Salvioli2024}, en GBMARL ambos agentes son redes de RL profundo que co-evolucionan en \emph{self-play}, sobre un simulador específico de GBM calibrado con datos reales de sensibilidad farmacológica.
+
+  \item \textbf{Política adaptativa descubierta y su mecanismo.} Mostramos que el marco descubre una política de dosificación que extiende el tiempo a la dominancia resistente por encima tanto de la dosis máxima tolerada como de la heurística adaptativa de Gatenby, de forma estadísticamente significativa. Además, interpretamos el mecanismo aprendido: una dosificación intermitente y modulada que preserva una población sensible competidora, redescubriendo de manera autónoma el principio de la terapia adaptativa.
+
+  \item \textbf{Métrica de evaluación clínicamente honesta.} Formalizamos una métrica de tiempo a falla combinado, que mide los días en que el tumor permanece controlado en carga \emph{y} mayoritariamente tratable, reportando el modo de falla. Esta métrica evita los artefactos de las métricas de carga aislada ---que premian la reducción agresiva e inducen resistencia--- y se acompaña de un protocolo de validación multi-semilla con reporte por tasa de éxito y significancia estadística.
+
+  \item \textbf{Estudio de ablación CTDE frente a IPPO en oncología.} Realizamos una ablación controlada que aísla el efecto del crítico centralizado, reportando de forma honesta en qué condiciones aporta sobre el aprendizaje independiente. Con ello retomamos, en el dominio nuevo de la terapia adaptativa, la pregunta abierta por de Witt et al.~\cite{deWitt2020} sobre la suficiencia del aprendizaje independiente.
+\end{enumerate}
+
+El resto de esta tesis se organiza como sigue. El Capítulo~\ref{cap:related-work} revisa críticamente la literatura en terapia adaptativa, modelos de resistencia, RL oncológico y modelos adversariales del cáncer. El Capítulo~\ref{cap:metodologia} presenta la arquitectura de GBMARL: el simulador calibrado, el entorno multiagente y la formulación adversarial MAPPO-CTDE. El Capítulo~\ref{cap:resultados} reporta la calibración, la validación multi-semilla, la comparación frente a las líneas base y la ablación CTDE. Finalmente, el Capítulo~\ref{cap:conclusiones} discute las limitaciones, los modos de falla y el trabajo futuro, y presenta las conclusiones.
