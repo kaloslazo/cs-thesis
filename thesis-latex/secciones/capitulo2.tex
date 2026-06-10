@@ -1,40 +1,124 @@
-\chapter{MARCO TEÓRICO}
+\chapter{REVISIÓN CRÍTICA DE LA LITERATURA}
+\label{cap:related-work}
 
-Inicie aquí el texto, utilizando sangría de 1.25 cm. en el primer
-párrafo. Continúe el segundo párrafo.
+Este capítulo sitúa a \textbf{GBMARL} ---el marco de aprendizaje por refuerzo multiagente (MARL) adversarial para terapia adaptativa en glioblastoma multiforme (GBM) que se propone en esta tesis--- dentro de seis vertientes convergentes de la literatura. Examinamos: (i)~la terapia adaptativa y la dinámica evolutiva de la resistencia como paradigma clínico; (ii)~los modelos matemáticos de competencia entre poblaciones sensibles y resistentes que fundamentan nuestro simulador; (iii)~el aprendizaje por refuerzo (RL) aplicado a la dosificación oncológica; (iv)~los modelos teórico-de-juegos y adversariales del cáncer, vecinos directos de nuestra formulación; (v)~los fundamentos de RL adversarial y multiagente (RARL, MAPPO, CTDE) sobre los que se construye el método; y (vi)~el modelado específico de la resistencia a la temozolomida (TMZ) en GBM. Mantenemos el alcance acotado: incluimos trabajos que (a)~modelan la resistencia evolutiva del tumor, (b)~optimizan la dosificación mediante control o aprendizaje, o (c)~aportan las primitivas algorítmicas de las que depende nuestro método.
 
-Continúe el segundo párrafo
+Una tensión recorre las seis vertientes: \emph{cómo se representa la respuesta evolutiva del tumor}. Los enfoques existentes la modelan o bien no la modelan en absoluto (RL de dosificación sobre dinámicas tumorales fijas), o de forma heurística (terapia adaptativa de Gatenby), o como un \emph{seguidor racional resuelto analíticamente} (juegos de Stackelberg y control óptimo). Esa es precisamente la apertura que esta tesis ataca: ningún trabajo modela a ambos agentes ---terapia y tumor--- como aprendices de RL profundo que co-evolucionan adversarialmente sobre un simulador de GBM calibrado con datos reales. El capítulo se organiza alrededor de esa tensión y cierra con una síntesis metodológica y una declaración explícita de las brechas que motivan nuestras contribuciones.
 
-\section{Primer subtítulo}
+\section{Terapia adaptativa y dinámica evolutiva de la resistencia}
+\label{sec:terapia-adaptativa}
 
-En la actualidad, las unidades de información hacen frente a muchos cambios
-debido a los avances tecnológicos, explosión informativa, nuevos recursos y
-soportes, por lo cual se implementan servicios innovadores que les permitan a
-sus usuarios tener acceso a muchas fuentes de información. Para asegurar el
-acceso y uso de los servicios los usuarios requieren poseer una serie de
-habilidades que les permitan identificar, recuperar, manejar, discernir,
-organizar, utilizar y comunicar la información de manera eficaz para la toma de
-decisiones.
+El estándar de cuidado en cánceres diseminados aplica la dosis máxima tolerada (MTD) buscando matar la mayor cantidad de células posible; sin embargo, esta estrategia ejerce una fuerte presión selectiva que favorece la expansión de subclones resistentes, y la recaída resulta casi inevitable~\cite{Gatenby2022}. La terapia adaptativa propone un cambio de objetivo: en lugar de erradicar, busca \emph{contener} el tumor explotando la competencia ecológica entre células sensibles y resistentes, preservando deliberadamente una población sensible que suprime el crecimiento de las resistentes~\cite{Gatenby2022,Zhang2023Review}.
 
-Entre las causas se pueden considerar la falta de tiempo asignado al taller,
-las limitaciones en cuanto a laboratorios, el poco personal, la falta de una
-correcta selección de los contenidos, así como, una calificación que asegure el
-cumplimiento de los objetivos.
+La evidencia preclínica y de simulación es consistente. Gallaher et al.\ mostraron, con un modelo basado en agentes, que la modulación de dosis y los periodos de descanso controlan tumores heterogéneos suprimiendo espacialmente a las poblaciones resistentes menos aptas, mientras que la terapia continua a MTD conduce a recurrencia inevitable en presencia de cualquier célula resistente~\cite{Gallaher2017}. Hockings et al.\ confirmaron \emph{in vivo} en cáncer de ovario que adaptar la dosis a la respuesta tumoral prolonga significativamente la supervivencia sin aumentar la dosis media ni la toxicidad, aprovechando la menor aptitud de las células resistentes en ausencia de fármaco~\cite{Hockings2025}.
 
+La validación clínica más influyente proviene del cáncer de próstata metastásico resistente a castración (mCRPC). Zhang et al.\ formularon un modelo de teoría de juegos evolutiva con ecuaciones de Lotka-Volterra y tres ``especies'' competidoras, y lo usaron para guiar ciclos de tratamiento de abiraterona según la dinámica tumoral de cada paciente; el ensayo piloto extendió el tiempo a progresión muy por encima del estándar usando menos de la mitad de la dosis acumulada~\cite{Zhang2017}. El seguimiento extendido reportó mejoras sostenidas en supervivencia libre de progresión y supervivencia global frente a una cohorte contemporánea con dosificación estándar~\cite{Zhang2022}. Este resultado es central para nuestra tesis: confirma que el valor de una estrategia evolutivamente informada no está en reducir el tumor, sino en \emph{retrasar} la dominancia resistente.
 
-\section{Segundo subtítulo}
+\section{Modelos matemáticos de la competencia sensible--resistente}
+\label{sec:modelos-matematicos}
 
-En la actualidad, las unidades de información hacen frente a muchos cambios
-debido a los avances tecnológicos, explosión informativa, nuevos recursos y
-soportes, por lo cual se implementan servicios innovadores que les permitan a
-sus usuarios tener acceso a muchas fuentes de información. Para asegurar el
-acceso y uso de los servicios los usuarios requieren poseer una serie de
-habilidades que les permitan identificar, recuperar, manejar, discernir,
-organizar, utilizar y comunicar la información de manera eficaz para la toma de
-decisiones.
+El simulador de GBMARL se apoya en la tradición de modelos de ecuaciones diferenciales ordinarias (EDO) para la dinámica tumoral y la evolución de la resistencia, revisados exhaustivamente por Yin et al.~\cite{Yin2019}. El núcleo de nuestro modelo ---dos poblaciones (sensible y resistente) en competencia logística tipo Lotka-Volterra--- sigue directamente a Strobl et al., quienes demostraron que el \emph{costo de resistencia} y la \emph{tasa de recambio} (turnover) celular determinan cuándo la terapia adaptativa logra extender el tiempo a progresión frente a la terapia continua~\cite{Strobl2020}. Estos dos parámetros son precisamente los que calibramos en nuestro simulador.
 
-Entre las causas se pueden considerar la falta de tiempo asignado al taller,
-las limitaciones en cuanto a laboratorios, el poco personal, la falta de una
-correcta selección de los contenidos, así como, una calificación que asegure el
-cumplimiento de los objetivos.
+Trabajos posteriores refinan esta base. Masud et al.\ analizaron una dosificación evolutiva dependiente del tiempo sobre un modelo Lotka-Volterra, mostrando que un balance adecuado de la competencia permite la coexistencia estable de poblaciones por debajo de una carga tolerable~\cite{Masud2024}. Bao et al.\ caracterizaron el comportamiento biestable de poblaciones heterogéneas bajo farmacocinética, y hallaron que la resistencia preexistente contribuye más que la generada durante el tratamiento~\cite{Bao2023}.
 
+Un aspecto clave de nuestro modelo es que la transición fenotípica sensible$\rightarrow$resistente se trata como una acción controlable del adversario, en lugar de una mutación irreversible. Esta elección está respaldada por la creciente evidencia de mecanismos \emph{no genéticos} de resistencia: Boumahdi y Sauvageau revisaron cómo la plasticidad fenotípica reversible y el cambio de estado celular (\emph{phenotype switching}) permiten a las células tolerar el fármaco y reganar sensibilidad tras su retirada~\cite{Boumahdi2019}. França et al.\ caracterizaron longitudinalmente este proceso como un ``continuo de resistencia'' de transiciones de estado celular con aptitud creciente~\cite{Franca2024}. Estos hallazgos justifican modelar la resistencia como un estado dinámico y maleable ---el sustrato sobre el que un adversario puede actuar.
+
+\section{Aprendizaje por refuerzo para la dosificación oncológica}
+\label{sec:rl-dosificacion}
+
+La aplicación de RL a la programación de quimioterapia tiene una trayectoria consolidada, revisada por Yang et al.~\cite{Yang2022}. Los primeros trabajos, como Padmanabhan et al., usaron Q-learning sobre estados discretizados para el control en lazo cerrado de la dosis~\cite{Padmanabhan2017}. Mashayekhi et al.\ avanzaron hacia RL profundo en el espacio continuo original de estados y acciones, evitando la discretización guiada por expertos y reduciendo la duración del tratamiento y la dosis total administrada~\cite{Mashayekhi2023}.
+
+El vecino más directo en esta vertiente es Gallagher et al., quienes aplicaron RL profundo para guiar la programación de terapia adaptativa en un modelo calibrado a próstata, superando los protocolos adaptativos vigentes y \emph{más que duplicando} el tiempo a progresión; además, destilaron políticas interpretables basadas en un único umbral de carga tumoral~\cite{Gallagher2024}. Su trabajo demuestra el potencial de RL para descubrir estrategias adaptativas superiores, pero adolece de una limitación que esta tesis aborda: trata al tumor como una dinámica fija (un único agente que aprende), sin modelar la respuesta evolutiva del tumor como un adversario que también aprende.
+
+\section{Teoría de juegos y modelos adversariales del cáncer}
+\label{sec:teoria-juegos}
+
+Esta vertiente es la más adyacente a GBMARL y justifica nuestro encuadre ``adversarial''. La referencia fundacional es Staňková et al., quienes formularon el tratamiento del cáncer como un juego de Stackelberg con dos asimetrías: solo el médico juega racionalmente (el tumor únicamente se adapta a condiciones actuales) y existe una dinámica líder-seguidor en la que el oncólogo juega primero~\cite{Stankova2019}. El estándar de cuidado, al repetir el mismo fármaco hasta la progresión, desaprovecha ambas asimetrías.
+
+Sobre esta base, Salvioli et al.\ compararon en un juego evolutivo de Stackelberg la MTD frente a una terapia ``evolutivamente ilustrada'' que anticipa tanto la respuesta ecológica como la evolución de la resistencia, hallando que esta última logra los mejores resultados con la menor dosis y la menor resistencia inducida~\cite{Salvioli2024}. Orlando et al.\ ya habían planteado el cáncer como un juego de control óptimo donde el oncólogo anticipa las adaptaciones del tumor explotando compromisos evolutivos~\cite{Orlando2012}. Romano et al.\ extendieron el marco a control basado en juegos evolutivos de Stackelberg y a un esquema de tres agentes tumor-inmune con liderazgo modulado~\cite{Romano2024,Romano2025}.
+
+\subsection{Vecinos más cercanos y diferenciación}
+\label{subsec:vecinos}
+
+Dos trabajos recientes son los más próximos a esta tesis y, por ser un probable punto de escrutinio, merecen una diferenciación explícita. Tavakoli et al.\ integraron RL con teoría de juegos de Stackelberg sobre poblaciones sensibles y resistentes, aprendiendo políticas de dosificación que reducen resistencia y toxicidad~\cite{Tavakoli2025}. Karima et al.\ propusieron ``Nash-RL'', un marco que modela la interacción oncólogo-tumor como un juego de Stackelberg con un líder entrenado por RL y un seguidor evolutivo, mencionando RL multiagente y retraso de la resistencia~\cite{Karima2025}. Trivedi et al.\ implementaron un modelo basado en agentes con optimización de Stackelberg, logrando reducir la intensidad acumulada de tratamiento manteniendo el control~\cite{Trivedi2025}.
+
+Tres diferencias separan a GBMARL de estos trabajos. \emph{Primero}, en todos ellos el tumor es un seguidor resuelto analíticamente o un agente evolutivo no aprendiente, mientras que en GBMARL ambos agentes son redes de RL profundo que co-evolucionan en \emph{self-play} adversarial. \emph{Segundo}, estos modelos son genéricos o ilustrativos (próstata, mama, o abstractos), mientras que GBMARL opera sobre un simulador \emph{específico de GBM calibrado con datos reales} de sensibilidad farmacológica (GDSC2~\cite{GDSC} y DepMap~\cite{DepMap}). \emph{Tercero}, Nash-RL en particular permanece como prueba de concepto sin calibración ni ablación arquitectónica, mientras que esta tesis estudia empíricamente el rol del crítico centralizado (CTDE frente a aprendizaje independiente) con una métrica de progresión auditada. GBMARL es, en suma, la realización empírica, calibrada y rigurosamente ablacionada de una idea que estos trabajos solo bosquejaron.
+
+\section{Fundamentos de RL adversarial y multiagente}
+\label{sec:fundamentos-marl}
+
+El componente adversarial de GBMARL hereda del RL robusto. Pinto et al.\ introdujeron el RL adversarial robusto (RARL), donde un agente se entrena en presencia de un adversario que aprende una política de desestabilización óptima, formulando el aprendizaje como un objetivo minimax de suma cero; este esquema mejora la estabilidad del entrenamiento y la robustez de la política resultante~\cite{Pinto2017}. Huang et al.\ refinaron esta idea modelando el RL robusto como un juego de Stackelberg general en lugar de simultáneo de suma cero, lo que reduce la conservadurismo excesivo y la inestabilidad del entrenamiento~\cite{Huang2022}, un puente directo entre nuestra vertiente metodológica y la de teoría de juegos del cáncer. Daskalakis et al.\ aportaron garantías de convergencia para métodos de gradiente de política \emph{independientes} en juegos competitivos de dos agentes~\cite{Daskalakis2021}, resultado relevante para la variante IPPO que evaluamos.
+
+En cuanto a la arquitectura multiagente, Amato ofrece la referencia introductoria de los paradigmas de entrenamiento centralizado con ejecución descentralizada (CTDE) y sus alternativas~\cite{Amato2024}. El algoritmo que adoptamos, MAPPO, emplea un crítico centralizado que accede al estado conjunto durante el entrenamiento mientras los actores ejecutan con observación local~\cite{Wang2025MAPPO}. Como contraparte, evaluamos la variante de críticos independientes (IPPO)~\cite{deWitt2020}; nuestra ablación CTDE retoma directamente la pregunta abierta por de Witt et al.\ sobre si el aprendizaje independiente es suficiente.
+
+\section{Glioblastoma y resistencia a la temozolomida}
+\label{sec:gbm-tmz}
+
+El glioblastoma es incurable y su recurrencia resistente a TMZ es casi universal, lo que lo convierte en un caso paradigmático para una estrategia de contención evolutiva. Pérez-Aliacar et al.\ desarrollaron un modelo de adquisición de resistencia a TMZ en GBM basado en variables internas del estado fenotípico, calibrado con experimentos de esferoides 3D~\cite{PerezAliacar2024}; su enfoque respalda directamente nuestra metodología de calibración del simulador.
+
+Dos trabajos aportan evidencia que \emph{respalda nuestro hallazgo principal} ---que espaciar y modular la dosis retrasa la resistencia. Segura-Collar et al.\ mostraron, mediante modelos validados y ensayos \emph{in silico}, que aumentar el tiempo entre dosis de TMZ reduce la toxicidad, retrasa la aparición de resistencias y mejora la supervivencia en GBM de crecimiento lento, mediado por cambios en el fenotipo tumoral~\cite{SeguraCollar2022}. Delobel et al.\ obtuvieron ganancias de supervivencia superiores a quince meses al introducir periodos de descanso entre dosis en gliomas, atribuidas al papel de las células persistentes en la resistencia~\cite{Delobel2023}. Sorribes et al.\ exploraron, desde el ángulo mecanístico, la combinación de TMZ con inhibición de la reparación del ADN~\cite{Sorribes2019}. En conjunto, esta línea confirma que la programación temporal de TMZ ---no solo su intensidad--- determina la dinámica de la resistencia, justo el grado de libertad que GBMARL optimiza.
+
+\section{Temas transversales}
+\label{sec:transversales}
+
+Tres ejes metodológicos atraviesan la literatura revisada. \emph{Primero}, la representación del adversario evolutivo va desde su ausencia~\cite{Padmanabhan2017,Mashayekhi2023,Gallagher2024}, pasando por heurísticas de competencia~\cite{Gallaher2017,Strobl2020}, hasta seguidores racionales resueltos analíticamente~\cite{Stankova2019,Salvioli2024,Orlando2012}; GBMARL se sitúa en el extremo de un adversario co-aprendiente de RL profundo. \emph{Segundo}, la integración de aprendizaje va de nula, a RL de agente único~\cite{Gallagher2024,Mashayekhi2023}, a RL multiagente adversarial; nuestro trabajo se ubica en este último, combinando RARL~\cite{Pinto2017} con CTDE~\cite{Amato2024}. \emph{Tercero}, la calibración y evaluación oscila entre modelos genéricos ilustrativos y modelos calibrados a datos reales; GBMARL calibra con GDSC2/DepMap y evalúa con una métrica combinada de progresión y tratabilidad, en lugar de la métrica de carga aislada habitual.
+
+\section{Brechas identificadas y justificación}
+\label{sec:brechas}
+
+Las seis vertientes dejan una brecha compuesta y específica que motiva esta tesis.
+
+\subsection{Brecha en el modelado del adversario}
+Ningún trabajo modela la respuesta evolutiva del tumor como un agente de RL profundo que \emph{aprende} en self-play adversarial. La línea de teoría de juegos~\cite{Stankova2019,Salvioli2024,Romano2024} resuelve al seguidor de forma analítica o asume juego racional; la línea de RL de dosificación~\cite{Gallagher2024,Mashayekhi2023} trata al tumor como dinámica fija. GBMARL cierra esta brecha entrenando terapia y tumor simultáneamente como adversarios, heredando la estabilidad y robustez documentadas para RARL~\cite{Pinto2017}.
+
+\subsection{Brecha de calibración específica de GBM}
+Los trabajos de RL y juegos se han centrado en próstata o mama~\cite{Zhang2017,Tavakoli2025}, o en modelos abstractos~\cite{Karima2025}. GBMARL ancla su simulador en datos reales de sensibilidad farmacológica de líneas de GBM (GDSC2~\cite{GDSC}, DepMap~\cite{DepMap}), en línea con la calibración experimental de Pérez-Aliacar et al.~\cite{PerezAliacar2024}.
+
+\subsection{Brecha de rigor en la ablación arquitectónica}
+La pregunta de si el crítico centralizado (CTDE) aporta sobre el aprendizaje independiente (IPPO) rara vez se somete a prueba en aplicaciones oncológicas. Retomando la hipótesis de de Witt et al.~\cite{deWitt2020}, GBMARL realiza una ablación controlada CTDE frente a IPPO y reporta el resultado de forma honesta, con una métrica de progresión auditada que evita los artefactos de las métricas de carga aisladas.
+
+En suma, GBMARL no es una mejora marginal sobre una única línea base. Reúne, en un solo marco aprendido, (a)~el modelado del tumor como adversario co-aprendiente, (b)~un simulador de GBM calibrado con datos reales, y (c)~una evaluación rigurosa de la arquitectura CTDE con una métrica clínicamente honesta. La literatura revisada aporta los ingredientes por separado, pero ninguno de los trabajos los combina. Cerrar esa brecha compuesta es lo que esta tesis se propone.
+
+\section{Tabla resumen}
+\label{sec:tabla-resumen}
+
+La Tabla~\ref{tab:related-work} resume los trabajos principales revisados y su relación con GBMARL.
+
+% Requiere \usepackage{longtable} en el preámbulo (main.tex).
+{\footnotesize
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{@{}p{0.4cm}p{2.7cm}p{0.7cm}p{3.3cm}p{3.9cm}@{}}
+\caption{Resumen de los trabajos principales revisados y su relación con GBMARL.}
+\label{tab:related-work}\\
+\hline
+\textbf{\#} & \textbf{Trabajo} & \textbf{Año} & \textbf{Hallazgo clave} & \textbf{Relación con GBMARL} \\
+\hline
+\endfirsthead
+\multicolumn{5}{l}{\textit{\tablename~\thetable{} -- continúa de la página anterior}}\\
+\hline
+\textbf{\#} & \textbf{Trabajo} & \textbf{Año} & \textbf{Hallazgo clave} & \textbf{Relación con GBMARL} \\
+\hline
+\endhead
+\hline
+\multicolumn{5}{r}{\textit{continúa en la página siguiente}}\\
+\endfoot
+\hline
+\endlastfoot
+1 & Zhang et al.~\cite{Zhang2017} & 2017 & Terapia adaptativa por juego evolutivo duplica el TTP en próstata & Validación clínica del paradigma de contención \\
+2 & Strobl et al.~\cite{Strobl2020} & 2020 & Costo de resistencia y turnover rigen el éxito adaptativo & Base del modelo Lotka-Volterra que calibramos \\
+3 & Gallaher et al.~\cite{Gallaher2017} & 2017 & Modulación de dosis suprime resistentes por competencia & Heurística que nuestro agente supera \\
+4 & Gallagher et al.~\cite{Gallagher2024} & 2024 & RL profundo supera protocolos adaptativos en próstata & Vecino RL; tumor fijo, sin adversario \\
+5 & Staňková et al.~\cite{Stankova2019} & 2019 & Tratamiento como juego de Stackelberg líder-seguidor & Encuadre adversarial fundacional \\
+6 & Salvioli et al.~\cite{Salvioli2024} & 2024 & Terapia evolutivamente ilustrada vence a MTD en un SEG & Seguidor analítico; lo hacemos aprendiente \\
+7 & Tavakoli et al.~\cite{Tavakoli2025} & 2025 & RL + Stackelberg en mama sensible/resistente & Vecino cercano; RL de agente único \\
+8 & Karima et al.~\cite{Karima2025} & 2025 & Nash-RL: oncólogo-tumor como Stackelberg con RL & Vecino más cercano; sin calibración \\
+9 & Pinto et al.~\cite{Pinto2017} & 2017 & RARL: adversario aprendiente mejora robustez & Fundamento del self-play adversarial \\
+10 & Amato~\cite{Amato2024} & 2024 & Introducción a CTDE en MARL cooperativo & Paradigma de nuestro crítico centralizado \\
+11 & de Witt et al.~\cite{deWitt2020} & 2020 & IPPO iguala o supera a métodos centralizados & Hipótesis que ablacionamos (CTDE vs.\ IPPO) \\
+12 & Pérez-Aliacar et al.~\cite{PerezAliacar2024} & 2024 & Modelo de resistencia a TMZ en GBM calibrado a esferoides & Respalda nuestra calibración de GBM \\
+13 & Segura-Collar et al.~\cite{SeguraCollar2022} & 2022 & Espaciar dosis de TMZ retrasa la resistencia en GBM & Respalda nuestro hallazgo principal \\
+14 & Boumahdi y Sauvageau~\cite{Boumahdi2019} & 2019 & Plasticidad fenotípica reversible como resistencia & Justifica modelar la transición $\phi$ \\
+15 & Yin et al.~\cite{Yin2019} & 2019 & Revisión de modelos EDO de dinámica y resistencia & Marco de modelado del simulador \\
+\hline
+\end{longtable}
+}

@@ -18,23 +18,7 @@ from scipy import stats
 
 from gbmarl.tumor_env import TumorEnv
 from gbmarl.mappo import train_mappo, obs_therapy
-
-FIXED_PHI = 0.01
-
-
-def ttp_resistencia(env, therapy_fn, tumor_fn=lambda s: FIXED_PHI):
-    obs, _ = env.reset(seed=0); state = obs["therapy"]; done = False
-    while not done:
-        u = float(therapy_fn(state)); phi = float(tumor_fn(state))
-        obs, rew, term, trunc, info = env.step({"therapy": np.array([u], np.float32),
-                                                "tumor": np.array([phi], np.float32)})
-        state = obs["therapy"]; S, R = state[0], state[1]
-        if R / (S + R + 1e-9) > env.r_majority:
-            return info["therapy"]["day"]
-        done = (term.get("therapy", True) if term else True) or \
-               (trunc.get("therapy", True) if trunc else True)
-    return env.horizon
-
+from gbmarl.evalutils import ttp_combinado, FIXED_PHI
 
 def policy_from(th):
     import torch
@@ -50,7 +34,7 @@ def correr(env, centralized, seeds, steps):
     for k in range(seeds):
         th, _, _ = train_mappo(env, total_timesteps=steps, seed=k,
                                centralized=centralized, verbose=False)
-        ttps.append(ttp_resistencia(env, policy_from(th)))
+        ttps.append(ttp_combinado(env, policy_from(th)))
     return np.array(ttps, dtype=float)
 
 
@@ -90,7 +74,7 @@ def main():
            color=["#2E75B6", "#95A5A6"], alpha=0.85)
     for i, v in enumerate(medias):
         ax.text(i, v + 1, f"{v:.0f}", ha="center", fontweight="bold")
-    ax.set_ylabel("TTP-resistencia (días)")
+    ax.set_ylabel("TTP-combinado (días)")
     ax.set_title(f"Ablación CTDE (n={args.seeds} semillas)")
     ax.grid(alpha=0.3, axis="y"); fig.tight_layout()
     os.makedirs("outputs", exist_ok=True)

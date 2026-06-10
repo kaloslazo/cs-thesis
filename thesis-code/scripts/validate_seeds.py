@@ -17,36 +17,7 @@ from scipy import stats
 
 from gbmarl.tumor_env import TumorEnv
 from gbmarl.mappo import train_mappo, obs_therapy
-
-FIXED_PHI = 0.01
-U_MAX = 1.0
-
-
-class AdaptiveTherapy:
-    def __init__(self, on=0.5, off=0.25, u=U_MAX):
-        self.on, self.off, self.u, self.dosing = on, off, u, True
-    def reset(self): self.dosing = True
-    def __call__(self, s):
-        b = s[0] + s[1]
-        if self.dosing and b < self.off: self.dosing = False
-        elif not self.dosing and b > self.on: self.dosing = True
-        return self.u if self.dosing else 0.0
-
-
-def ttp_resistencia(env, therapy_fn, tumor_fn=lambda s: FIXED_PHI):
-    """Días hasta que las resistentes son mayoría (R/(S+R) > r_majority)."""
-    obs, _ = env.reset(seed=0); state = obs["therapy"]; done = False
-    while not done:
-        u = float(therapy_fn(state)); phi = float(tumor_fn(state))
-        obs, rew, term, trunc, info = env.step({"therapy": np.array([u], np.float32),
-                                                "tumor": np.array([phi], np.float32)})
-        state = obs["therapy"]; S, R = state[0], state[1]
-        if R / (S + R + 1e-9) > env.r_majority:
-            return info["therapy"]["day"]
-        done = (term.get("therapy", True) if term else True) or \
-               (trunc.get("therapy", True) if trunc else True)
-    return env.horizon
-
+from gbmarl.evalutils import ttp_combinado, Gatenby, FIXED_PHI, U_MAX
 
 def policy_from(th):
     import torch
@@ -66,10 +37,10 @@ def main():
     env = TumorEnv(horizon_days=180)
 
     # Baselines deterministas (no dependen de semilla)
-    ttp_mtd = ttp_resistencia(env, lambda s: U_MAX)
-    ad = AdaptiveTherapy(); ttp_gat = ttp_resistencia(env, ad)
+    ttp_mtd = ttp_combinado(env, lambda s: U_MAX)
+    ttp_gat = ttp_combinado(env, Gatenby())
     print("=" * 60)
-    print("VALIDACIÓN MULTI-SEMILLA — TTP-resistencia (días)")
+    print("VALIDACIÓN MULTI-SEMILLA — TTP-combinado (días, métrica correcta)")
     print("=" * 60)
     print(f"  Baselines:  MTD={ttp_mtd}   Gatenby={ttp_gat}")
     print(f"  Entrenando MAPPO con {args.seeds} semillas ({args.steps} pasos c/u)...")
@@ -77,7 +48,7 @@ def main():
     mappo_ttps = []
     for k in range(args.seeds):
         th, _, _ = train_mappo(env, total_timesteps=args.steps, seed=k, verbose=False)
-        ttp = ttp_resistencia(env, policy_from(th))
+        ttp = ttp_combinado(env, policy_from(th))
         mappo_ttps.append(ttp)
         print(f"    semilla {k+1:2d}/{args.seeds}:  TTP = {ttp}")
 
@@ -102,7 +73,7 @@ def main():
     errores = [0, 0, sd]
     colores = ["#C0392B", "#E67E22", "#2E75B6"]
     ax.bar(nombres, valores, yerr=errores, capsize=8, color=colores, alpha=0.85)
-    ax.set_ylabel("TTP-resistencia (días)")
+    ax.set_ylabel("TTP-combinado (días)")
     ax.set_title(f"Tiempo a dominancia resistente (n={args.seeds} semillas)")
     for i, v in enumerate(valores):
         ax.text(i, v + 1, f"{v:.0f}", ha="center", fontweight="bold")
