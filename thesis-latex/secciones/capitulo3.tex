@@ -205,3 +205,45 @@ La política aprendida se compara contra tres referencias deterministas evaluada
 \subsection{Estudios de ablación y sensibilidad}
 
 Dos estudios complementan la validación principal. El \textbf{estudio de ablación} compara MAPPO (crítico centralizado) frente a IPPO (crítico local) sobre las mismas semillas, aislando la contribución de CTDE. El \textbf{análisis de sensibilidad} varía, una a la vez, las constantes elegidas a mano ---la fuerza del adversario $\phi_{\max}$, los umbrales de evaluación $\theta_{\text{prog}}$ y $\rho_{\text{may}}$, el peso de toxicidad $w_{\text{tox}}$, la potencia del fármaco $\delta_S^{\max}$ y la brecha de resistencia $\mathrm{IC50}_R$--- alrededor de su valor por defecto, para verificar que el ordenamiento entre estrategias es robusto y no depende de la elección particular de hiperparámetros. Los resultados de ambos estudios se presentan en el Capítulo~\ref{cap:resultados}.
+
+\section{Pipeline experimental reproducible}
+\label{sec:pipeline}
+
+Las secciones anteriores describen los componentes de GBMARL de forma aislada. En la práctica, esos componentes se ejecutan como un \textbf{pipeline único, reproducible y construido de adentro hacia afuera} (\emph{inside-out}), en el que cada fase \emph{de-riskea} a la siguiente: ninguna etapa se da por válida hasta que la anterior ha sido verificada. La Figura~\ref{fig:pipeline} resume las siete fases y su encadenamiento; la decisión de ordenarlas así responde a una estrategia de control de riesgo, no a una conveniencia de implementación.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/pipeline_diagram.png}
+\caption{Pipeline experimental reproducible de GBMARL. Cada fase de-riskea la siguiente: los datos calibran el simulador, el simulador se valida con pruebas unitarias, un agente único (PPO) confirma que el entorno es aprendible antes de introducir el segundo agente, el modelo titular (MAPPO) se contrasta con su ablación (IPPO) y, finalmente, todo se evalúa con la métrica auditada frente a las líneas base. El objetivo transversal es \emph{retrasar} la intratabilidad, no reducir el tumor.}
+\label{fig:pipeline}
+\end{figure}
+
+La Tabla~\ref{tab:pipeline} explicita, para cada fase, su propósito, su vínculo con el objetivo clínico (maximizar el tiempo de manejo) y qué aporta o qué riesgo elimina dentro del marco. La lógica de fondo es que un resultado multiagente solo es creíble si el sustrato sobre el que se aprende ---la dinámica, su calibración y la propia aprendibilidad del entorno--- ya fue probado por separado.
+
+\begin{table}[H]
+\centering
+\caption{Fases del pipeline experimental: propósito, vínculo con el objetivo y contribución. El objetivo del marco es maximizar el TTP-combinado (retrasar la intratabilidad).}
+\label{tab:pipeline}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{2.4cm}|p{4.0cm}|p{5.7cm}}
+\textbf{Fase} & \textbf{Propósito} & \textbf{Vínculo con el objetivo y contribución} \\
+\hline
+1. Datos (GDSC2 + DepMap) & Recuperar líneas de glioblastoma con sensibilidad a temozolomida. & Anclan la dinámica a la biología real (brecha S:R $\approx 9\times$); sin ellos la resistencia sería un supuesto arbitrario. \\
+2. Calibración & Derivar IC50 y forma de Hill de los datos; anclar el resto a literatura. & Fija la \emph{potencia} del fármaco con la que se mide cuánto se puede retrasar la progresión; separa dato de supuesto. \\
+3. Tests del simulador & Probar la EDO/RK4 de forma aislada (10/10 pruebas). & Garantiza que la dinámica conserva masa y es biológicamente válida antes de aprender sobre ella. \\
+4. PPO single-agent & De-riskear el entorno: ¿es aprendible contra un tumor fijo? & Verifica que la señal de recompensa induce control \emph{antes} de añadir el adversario; aísla fallos del entorno de fallos del MARL. \\
+5. MAPPO self-play (CTDE) & Entrenar el modelo titular: terapia y tumor co-evolucionan. & Produce la política adaptativa que maximiza el tiempo de manejo; es la contribución central. \\
+6. Ablación CTDE vs.\ IPPO & Aislar el efecto del crítico centralizado. & Atribuye causalmente la ventaja al componente CTDE, no al azar ni a otros factores. \\
+7. Evaluación TTP-combinado & Comparar frente a Sin tratar, MTD y Gatenby con la métrica auditada. & Cuantifica el objetivo (días de manejo) de forma honesta y comparable; cierra el ciclo de validación. \\
+\end{tabular}
+\end{table}
+
+\subsection{Por qué cada comparación}
+\label{sec:porque-comparaciones}
+
+El pipeline contiene tres comparaciones deliberadas, cada una respondiendo a una pregunta distinta. La comparación frente a las \textbf{líneas base} (Sin tratamiento, MTD y Gatenby) responde a si el aprendizaje aporta algo sobre lo ya conocido: Sin tratamiento fija el piso (la progresión natural), MTD representa el estándar clínico intuitivo de ``pegar fuerte'' y Gatenby es el competidor fuerte ---la mejor heurística adaptativa publicada---, de modo que superar a Gatenby es la prueba exigente de valor. La comparación \textbf{MAPPO frente a IPPO} (ablación) responde a si el crítico centralizado es la causa de la ventaja, manteniendo todo lo demás idéntico; sin esta comparación, atribuir el resultado a CTDE sería una conjetura. La comparación de \textbf{PPO frente al azar} (de-risk) responde a si el entorno es siquiera aprendible, y debe pasar antes de invertir esfuerzo en el aprendizaje multiagente. Reportar las tres ---y no solo la favorable--- es lo que convierte el resultado en una afirmación auditable.
+
+\subsection{Ejecución reanudable con checkpointing intra-corrida}
+\label{sec:checkpointing}
+
+El entrenamiento adversarial a la escala de la tesis (120\,000 pasos por corrida, decenas de semillas entre el modelo titular y la ablación) excede el tiempo disponible en una sola ejecución del entorno de cómputo. Para preservar la reproducibilidad sin sacrificar la escala, el pipeline se ejecuta mediante un \textbf{arnés reanudable con checkpointing intra-corrida}: cada ventana de cómputo entrena durante un presupuesto fijo de tiempo y luego serializa un punto de control completo ---pesos de actores y críticos, estado de los optimizadores, estado de los generadores aleatorios, paso acumulado y estado del entorno---, de modo que la siguiente ventana reanuda exactamente donde la anterior se detuvo, hasta alcanzar los pasos objetivo. El rollout de entrenamiento emplea además una ruta de integración escalar de la EDO, verificada numéricamente como idéntica a la implementación vectorizada de referencia (diferencia máxima nula sobre trayectorias completas), que reduce el tiempo de cómputo sin alterar la física ni la recompensa. Este mecanismo no modifica ninguna decisión de modelado: es la maquinaria de ejecución que hace factible la corrida completa de validación reportada en la Sección~\ref{sec:res-confirmacion}.

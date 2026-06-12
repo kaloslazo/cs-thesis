@@ -16,8 +16,9 @@ def test_reset_devuelve_dos_agentes():
 
 def test_espacios_de_accion_correctos():
     env = TumorEnv(u_max=1.0, phi_max=0.05)
-    assert env.action_space("therapy").high[0] == 1.0
-    assert env.action_space("tumor").high[0] == 0.05      # transición acotada
+    # high se almacena en float32: comparar con tolerancia, no por igualdad exacta
+    assert np.isclose(env.action_space("therapy").high[0], 1.0)
+    assert np.isclose(env.action_space("tumor").high[0], 0.05)   # transición acotada
 
 
 def test_rollout_aleatorio_no_crashea_y_respeta_horizonte():

@@ -158,4 +158,33 @@ El parámetro más sensible es la potencia del fármaco $\delta_S^{\max}$: al au
 \label{fig:sensibilidad}
 \end{figure}
 
-En conjunto, los resultados muestran que la política aprendida por GBMARL extiende el tiempo de manejo clínico de forma significativa frente a las dos líneas base, mediante un mecanismo de dosificación pulsada interpretable, con una ventaja modesta del crítico centralizado y un ordenamiento robusto frente a la variación de los hiperparámetros.
+\section{Confirmación con la corrida completa reproducible}
+\label{sec:res-confirmacion}
+
+Para verificar que los hallazgos no dependen de la maquinaria de cómputo, se reejecutó el pipeline completo de extremo a extremo bajo el arnés reanudable con checkpointing intra-corrida descrito en la Sección~\ref{sec:checkpointing}: el modelo titular y las dos ramas de la ablación se entrenaron a la escala plena de \textbf{120\,000 pasos}, con \textbf{cinco semillas independientes} por variante, y se evaluaron con la métrica TTP-combinado auditada. Las líneas base, al ser deterministas, reprodujeron sus valores de forma exacta (Sin tratamiento 12 días, MTD 13 días, Gatenby 27 días), lo que confirma la integridad de la reejecución.
+
+La Tabla~\ref{tab:res-confirmacion} reporta el tiempo de manejo por semilla. La lectura honesta para una distribución bimodal es la \textbf{tasa de éxito} y la \textbf{mediana}, no el promedio. MAPPO-CTDE supera a la heurística de Gatenby en las \textbf{cinco de cinco} semillas (mediana 33 días, mejor corrida 41), mientras que IPPO lo hace en \textbf{cuatro de cinco} (mediana 30 días). El ordenamiento $\text{MAPPO} > \text{IPPO} > \text{Gatenby} > \text{MTD} > \text{Sin tratar}$ se mantiene, reproduciendo el hallazgo central de la validación multi-semilla ($n=15$) con una corrida totalmente reproducible.
+
+\begin{table}[H]
+\centering
+\caption{Corrida completa reproducible (120\,000 pasos, $n=5$ semillas por variante). TTP-combinado por semilla y tasa de éxito frente a Gatenby (27 días). Para la distribución bimodal se reporta mediana y tasa de éxito, no media$\pm$desv.}
+\label{tab:res-confirmacion}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{l|c|c|c|c|c|c|c}
+\textbf{Variante} & \textbf{s0} & \textbf{s1} & \textbf{s2} & \textbf{s3} & \textbf{s4} & \textbf{Mediana} & \textbf{Éxito $>$Gatenby} \\
+\hline
+MAPPO (CTDE) & 41 & 32 & 31 & 33 & 41 & \textbf{33} & \textbf{5/5} \\
+IPPO (local) & 31 & 29 & 25 & 30 & 40 & 30 & 4/5 \\
+\end{tabular}
+\end{table}
+
+La Figura~\ref{fig:confirmacion} contrasta las medianas de ambas variantes de RL frente a las tres líneas base (panel a) y muestra la dispersión por semilla que evidencia la bimodalidad (panel b): ambas variantes presentan una mayoría de corridas agrupadas en torno a los 30--33 días y semillas aisladas que alcanzan la cuenca superior de 40--41 días, justificando el reporte por tasa de éxito en lugar de promedios. Coherente con el mecanismo descrito en la Sección~\ref{sec:res-mecanismo}, la dosis media aprendida en todas las semillas exitosas es baja (en torno a 0.05--0.06), confirmando la dosificación pulsada como patrón estable del aprendizaje.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/resultados_full_120k.png}
+\caption{Corrida completa reproducible (120\,000 pasos). (a) Mediana del TTP-combinado de las variantes de RL frente a las líneas base; la línea discontinua marca a Gatenby. (b) Dispersión por semilla ($n=5$): la mayoría de corridas se agrupa cerca de la mediana y semillas aisladas alcanzan la cuenca superior (bimodalidad), por lo que el resultado se reporta como tasa de éxito.}
+\label{fig:confirmacion}
+\end{figure}
+
+En conjunto, los resultados muestran que la política aprendida por GBMARL extiende el tiempo de manejo clínico de forma significativa frente a las dos líneas base, mediante un mecanismo de dosificación pulsada interpretable, con una ventaja modesta del crítico centralizado y un ordenamiento robusto frente a la variación de los hiperparámetros, y ese ordenamiento se reproduce en una corrida completa de extremo a extremo bajo control de reproducibilidad.
