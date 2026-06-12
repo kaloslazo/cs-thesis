@@ -1,0 +1,83 @@
+{
+  "baselines": {
+    "Sin tratamiento": [
+      12,
+      "FALLO: carga progresó",
+      0.0
+    ],
+    "MTD": [
+      13,
+      "FALLO: resistencia mayoría",
+      1.0
+    ],
+    "Gatenby": [
+      27,
+      "FALLO: resistencia mayoría",
+      0.296
+    ]
+  },
+  "mappo": [
+    {
+      "seed": 0,
+      "ttp": 41,
+      "motivo": "FALLO: resistencia mayoría",
+      "dosis": 0.05
+    },
+    {
+      "seed": 1,
+      "ttp": 32,
+      "motivo": "FALLO: carga progresó",
+      "dosis": 0.062
+    },
+    {
+      "seed": 2,
+      "ttp": 31,
+      "motivo": "FALLO: carga progresó",
+      "dosis": 0.059
+    },
+    {
+      "seed": 3,
+      "ttp": 33,
+      "motivo": "FALLO: carga progresó",
+      "dosis": 0.064
+    },
+    {
+      "seed": 4,
+      "ttp": 41,
+      "motivo": "FALLO: resistencia mayoría",
+      "dosis": 0.048
+    }
+  ],
+  "ippo": [
+    {
+      "seed": 0,
+      "ttp": 31,
+      "motivo": "FALLO: carga progresó",
+      "dosis": 0.067
+    },
+    {
+      "seed": 1,
+      "ttp": 29,
+      "motivo": "FALLO: carga progresó",
+      "dosis": 0.06
+    },
+    {
+      "seed": 2,
+      "ttp": 25,
+      "motivo": "FALLO: carga progresó",
+      "dosis": 0.058
+    },
+    {
+      "seed": 3,
+      "ttp": 30,
+      "motivo": "FALLO: carga progresó",
+      "dosis": 0.065
+    },
+    {
+      "seed": 4,
+      "ttp": 40,
+      "motivo": "FALLO: carga progresó",
+      "dosis": 0.048
+    }
+  ]
+}
