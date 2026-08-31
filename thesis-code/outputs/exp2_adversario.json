@@ -1,0 +1,643 @@
+{
+  "cells": {
+    "mappo@phi0.05@s0": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 0,
+      "ttp": 52,
+      "modo_falla": "resistencia"
+    },
+    "mappo@phi0.05@s1": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 1,
+      "ttp": 56,
+      "modo_falla": "resistencia"
+    },
+    "mappo@phi0.05@s2": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 2,
+      "ttp": 36,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.05@s3": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 3,
+      "ttp": 29,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.05@s4": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 4,
+      "ttp": 61,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.05@s5": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 5,
+      "ttp": 43,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.05@s6": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 6,
+      "ttp": 31,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.05@s7": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 7,
+      "ttp": 30,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.05@s8": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 8,
+      "ttp": 52,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.05@s9": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 9,
+      "ttp": 52,
+      "modo_falla": "resistencia"
+    },
+    "mappo@phi0.05@s10": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 10,
+      "ttp": 29,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.05@s11": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 11,
+      "ttp": 28,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.05@s12": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 12,
+      "ttp": 25,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.05@s13": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 13,
+      "ttp": 52,
+      "modo_falla": "resistencia"
+    },
+    "mappo@phi0.05@s14": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 14,
+      "ttp": 31,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s0": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 0,
+      "ttp": 26,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s1": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 1,
+      "ttp": 30,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s2": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 2,
+      "ttp": 30,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s3": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 3,
+      "ttp": 27,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s4": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 4,
+      "ttp": 29,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s5": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 5,
+      "ttp": 23,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s6": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 6,
+      "ttp": 28,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s7": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 7,
+      "ttp": 29,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s8": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 8,
+      "ttp": 29,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s9": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 9,
+      "ttp": 31,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s10": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 10,
+      "ttp": 32,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s11": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 11,
+      "ttp": 31,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s12": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 12,
+      "ttp": 31,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s13": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 13,
+      "ttp": 31,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.05@s14": {
+      "variant": "ippo",
+      "phi_max": 0.05,
+      "seed": 14,
+      "ttp": 29,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s0": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 0,
+      "ttp": 42,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s1": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 1,
+      "ttp": 30,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s2": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 2,
+      "ttp": 40,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s3": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 3,
+      "ttp": 27,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s4": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 4,
+      "ttp": 25,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s5": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 5,
+      "ttp": 57,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s6": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 6,
+      "ttp": 25,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s7": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 7,
+      "ttp": 27,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s8": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 8,
+      "ttp": 61,
+      "modo_falla": "resistencia"
+    },
+    "mappo@phi0.1@s9": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 9,
+      "ttp": 24,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s10": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 10,
+      "ttp": 29,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s11": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 11,
+      "ttp": 22,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s12": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 12,
+      "ttp": 22,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s13": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 13,
+      "ttp": 36,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.1@s14": {
+      "variant": "mappo",
+      "phi_max": 0.1,
+      "seed": 14,
+      "ttp": 26,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s0": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 0,
+      "ttp": 26,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s1": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 1,
+      "ttp": 27,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s2": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 2,
+      "ttp": 31,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s3": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 3,
+      "ttp": 31,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s4": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 4,
+      "ttp": 24,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s5": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 5,
+      "ttp": 26,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s6": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 6,
+      "ttp": 26,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s7": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 7,
+      "ttp": 23,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s8": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 8,
+      "ttp": 24,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s9": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 9,
+      "ttp": 27,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s10": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 10,
+      "ttp": 31,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s11": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 11,
+      "ttp": 31,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s12": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 12,
+      "ttp": 24,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s13": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 13,
+      "ttp": 27,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.1@s14": {
+      "variant": "ippo",
+      "phi_max": 0.1,
+      "seed": 14,
+      "ttp": 31,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s0": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 0,
+      "ttp": 40,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s1": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 1,
+      "ttp": 27,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s2": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 2,
+      "ttp": 25,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s3": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 3,
+      "ttp": 28,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s4": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 4,
+      "ttp": 46,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s5": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 5,
+      "ttp": 22,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s6": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 6,
+      "ttp": 33,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s7": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 7,
+      "ttp": 27,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s8": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 8,
+      "ttp": 35,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s9": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 9,
+      "ttp": 29,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s10": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 10,
+      "ttp": 28,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s11": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 11,
+      "ttp": 22,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s12": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 12,
+      "ttp": 26,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s13": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 13,
+      "ttp": 42,
+      "modo_falla": "carga"
+    },
+    "mappo@phi0.2@s14": {
+      "variant": "mappo",
+      "phi_max": 0.2,
+      "seed": 14,
+      "ttp": 25,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s0": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 0,
+      "ttp": 22,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s1": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 1,
+      "ttp": 29,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s2": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 2,
+      "ttp": 24,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s3": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 3,
+      "ttp": 22,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s4": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 4,
+      "ttp": 25,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s5": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 5,
+      "ttp": 23,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s6": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 6,
+      "ttp": 22,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s7": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 7,
+      "ttp": 24,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s8": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 8,
+      "ttp": 20,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s9": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 9,
+      "ttp": 24,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s10": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 10,
+      "ttp": 24,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s11": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 11,
+      "ttp": 20,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s12": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 12,
+      "ttp": 25,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s13": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 13,
+      "ttp": 25,
+      "modo_falla": "carga"
+    },
+    "ippo@phi0.2@s14": {
+      "variant": "ippo",
+      "phi_max": 0.2,
+      "seed": 14,
+      "ttp": 23,
+      "modo_falla": "carga"
+    }
+  },
+  "config": {
+    "seeds": 15,
+    "steps": 120000,
+    "phi_maxes": [
+      0.05,
+      0.1,
+      0.2
+    ]
+  }
+}
