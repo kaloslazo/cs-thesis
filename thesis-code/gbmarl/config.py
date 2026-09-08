@@ -32,6 +32,15 @@ class Params:
     # --- Transición fenotípica (placeholder; será acción del agente tumor) ---
     phi_base: float = 0.005    # tasa basal sensible -> resistente
 
+    # --- Salud del paciente (FASE 1, EDO acoplada; constantes de DISEÑO ilustrativas,
+    #     pendiente de calibración/sensibilidad — ver docs/variable_salud_paciente.md).
+    #     Solo las usa el path con salud (dynamics_health/health_env); el path 3-D las ignora.
+    rho_H: float = 0.10        # tasa de recuperación de la salud hacia 1 (1/día)
+    kappa_u: float = 0.10      # daño de la dosis a la salud (toxicidad)
+    kappa_b: float = 0.02      # daño de la carga tumoral a la salud
+    H_min: float = 0.30        # umbral de salud por debajo del cual muere el paciente
+    H0: float = 1.0            # salud inicial (1 = sano)
+
 
 def load_calibration(path: str = "data/processed/calibration.json") -> Params:
     """

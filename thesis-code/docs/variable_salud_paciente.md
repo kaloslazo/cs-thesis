@@ -180,3 +180,51 @@ framework PyTorch, y el término `−φ·S` de conservación de masa intacto.
 Si H1 falla (la terapia adaptativa **no** protege la salud espontáneamente), el mensaje honesto
 es que la salud debe entrar como objetivo explícito → justifica directamente la Fase 2 (agente
 clínico). Ningún resultado se descarta; cada uno redirige el plan.
+
+---
+
+## 10. Resultados Fase 1 — prueba de concepto (Opción A implementada)
+
+**Estado:** IMPLEMENTADO en rama aislada `worktree-variable-salud` (no fusionado a `main`).
+Código: `gbmarl/dynamics_health.py` (EDO 4-D), `gbmarl/health_env.py` (entorno con salud),
+`gbmarl/mappo_health.py` (entrenamiento), `scripts/exp_salud.py`, `tests/test_dynamics_health.py`.
+Todo **aditivo**: no toca `dynamics.py`/`tumor_env.py`/`mappo.py` → los 10 tests de la línea
+base 3-D siguen pasando (14/14 con los 4 nuevos).
+
+Constantes de diseño ilustrativas: `rho_H=0.10, kappa_u=0.10, kappa_b=0.02, H_min=0.30, H0=1.0`.
+
+### Corrida (120k pasos, 1 semilla, entorno CON salud)
+
+| Terapia | TTP | Falla por | H medio | H final | dosis media |
+|---|---|---|---|---|---|
+| Sin tratar | 12 | carga | 0.95 | 0.91 | 0.00 |
+| MTD (u=1.0) | 9 | resistencia | **0.61** | 0.39 | 1.00 |
+| Pulsado (heurística) | 19 | resistencia | 0.91 | 0.87 | 0.11 |
+| **MAPPO-salud (aprendido)** | **26** | carga | **0.91** | 0.87 | — |
+
+### Lectura
+
+- **El entorno 4-D entrena y la política aprendida supera a todas las heurísticas** (26 d vs
+  9/12/19), integrando la salud sin romper el aprendizaje.
+- **H1 (mecanismo emergente) — evidencia a favor.** MAPPO mantiene `H_medio=0.91`, casi al nivel
+  de no tratar (0.95) y muy por encima de MTD (0.61), **sin recompensa explícita de salud**. La
+  dosificación pulsada crea ventanas de recuperación → protege al paciente como efecto emergente.
+- **Costo oculto de MTD cuantificado:** `H_medio` cae a 0.61 (final 0.39) bajo dosis máxima. La
+  variable de salud **hace visible y medible** el daño que la métrica 3-D no capturaba.
+
+### Caveat honesto (no se maquilla)
+
+Con las constantes ilustrativas, **MTD muere por resistencia (día 9), no por salud**: la
+resistencia mata antes que la toxicidad cruce `H_min`. El mecanismo **discrimina
+cuantitativamente** (H 0.61 vs 0.91) pero el modo de falla "salud" aún no domina. Dispararlo
+requiere **calibrar `kappa_u`/`H_min`** (Sección 7, análisis de sensibilidad pre-registrado);
+NO se ajustan las constantes para fabricar el desenlace (sería la trampa metodológica que el
+proyecto prohíbe). El TTP de 26 d (una semilla, bimodal) es menor que la línea base 3-D, lo
+esperable al añadir la restricción de no sobredosificar; falta la corrida multi-semilla.
+
+### Pendiente antes de considerar la Fase 1 cerrada
+
+1. Multi-semilla (n≥10) con mediana + tasa de éxito, en el entorno con salud.
+2. Ablación con-H vs sin-H sobre las mismas semillas (aislar el efecto de la variable).
+3. Sensibilidad de `rho_H, kappa_u, kappa_b, H_min` ±30%.
+4. Evaluación de explotabilidad de las políticas con salud (mismo estándar que el benchmark).
