@@ -1,7 +1,7 @@
 \chapter{RESULTADOS}
 \label{cap:resultados}
 
-Este capítulo presenta los resultados experimentales de GBMARL siguiendo el orden de construcción del marco: la calibración del simulador (Sección~\ref{sec:res-calibracion}), la validación del entorno y la convergencia del aprendizaje (Sección~\ref{sec:res-aprendizaje}), la comparación frente a las líneas base con la métrica auditada (Sección~\ref{sec:res-comparacion}), el mecanismo de la política aprendida (Sección~\ref{sec:res-mecanismo}), la ablación del crítico centralizado (Sección~\ref{sec:res-ablacion}) y el análisis de sensibilidad (Sección~\ref{sec:res-sensibilidad}). La interpretación de estos hallazgos y sus implicaciones se desarrollan en el capítulo siguiente.
+Este capítulo presenta los resultados experimentales de GBMARL siguiendo el orden de construcción del marco: la calibración del simulador (Sección~\ref{sec:res-calibracion}), la validación del entorno y la convergencia del aprendizaje (Sección~\ref{sec:res-aprendizaje}), la comparación frente a las líneas base con la métrica auditada (Sección~\ref{sec:res-comparacion}), el mecanismo de la política aprendida (Sección~\ref{sec:res-mecanismo}), la ablación del crítico centralizado (Sección~\ref{sec:res-ablacion}), el análisis de sensibilidad (Sección~\ref{sec:res-sensibilidad}) y la robustez adversarial mediante explotabilidad (Sección~\ref{sec:res-explotabilidad}). La interpretación de estos hallazgos y sus implicaciones se desarrollan en el capítulo siguiente.
 
 \section{Calibración del simulador}
 \label{sec:res-calibracion}
@@ -185,6 +185,35 @@ La Figura~\ref{fig:confirmacion} contrasta las medianas de ambas variantes de RL
 \includegraphics[width=\textwidth]{images/resultados_full_120k.png}
 \caption{Corrida completa reproducible (120\,000 pasos). (a) Mediana del TTP-combinado de las variantes de RL frente a las líneas base; la línea discontinua marca a Gatenby. (b) Dispersión por semilla ($n=5$): la mayoría de corridas se agrupa cerca de la mediana y semillas aisladas alcanzan la cuenca superior (bimodalidad), por lo que el resultado se reporta como tasa de éxito.}
 \label{fig:confirmacion}
+\end{figure}
+
+\section{Robustez adversarial mediante explotabilidad}
+\label{sec:res-explotabilidad}
+
+Un juego resuelto por \textit{self-play} adolece de una limitación de validación: la política de terapia solo demostró ser buena frente al adversario tumoral con el que co-evolucionó, que pudo haber aprendido a perder de forma cómoda. Para descartar que la ventaja de MAPPO-CTDE sobre IPPO fuese un artefacto de dicho adversario, se evaluó la \textbf{explotabilidad} de cada política, siguiendo el estándar de la teoría de juegos computacional~\cite{deWitt2020}. Se congeló cada terapia aprendida ---actuando de forma determinista, como se desplegaría en la práctica--- y se entrenó, desde cero, un adversario tumoral dedicado exclusivamente a minimizar su tiempo a progresión (la \textit{mejor respuesta} o \textit{best-response}), obteniendo así una cota del peor caso ($n=10$ semillas, $\phi_{max}=0{,}05$, 120\,000 pasos). Al adversario se le otorgó un crítico centralizado a propósito, para conferirle la máxima ventaja posible y no evaluar contra un rival de paja.
+
+Bajo este ataque dedicado, la terapia MAPPO conservó una mediana de \textbf{45 días} $[27, 53]$, frente a los \textbf{27 días} $[23, 29]$ de IPPO ---equivalente a la heurística clínica de Gatenby--- (Tabla~\ref{tab:res-explotabilidad}). La proporción de semillas que superó a Gatenby \textit{incluso bajo ataque} fue del \textbf{90\,\%} para MAPPO y del \textbf{20\,\%} para IPPO (prueba exacta de Fisher unilateral, $p = 0{,}0027$, OR $= 36$).
+
+\begin{table}[H]
+\centering
+\caption{Explotabilidad de las terapias aprendidas ($n=10$ semillas). Para cada método se reporta el TTP-combinado frente a su propio adversario de \textit{self-play} y frente a un adversario \textit{best-response} entrenado a propósito para romperla (mediana $[$mín, máx$]$), y la tasa de éxito sobre Gatenby bajo ese ataque.}
+\label{tab:res-explotabilidad}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{l|c|c|c}
+\textbf{Variante} & \textbf{TTP self-play} & \textbf{TTP best-response} & \textbf{Éxito bajo ataque} \\
+\hline
+MAPPO (CTDE) & $48\ [29,61]$ & $\mathbf{45\ [27,53]}$ & $\mathbf{90\,\%}$ \\
+IPPO (local) & $29\ [23,31]$ & $27\ [23,29]$          & $20\,\%$ \\
+\end{tabular}
+\end{table}
+
+Cabe notar que la \textit{brecha} de explotabilidad ---la caída del TTP del \textit{self-play} al peor caso--- no difirió significativamente entre métodos (Mann-Whitney $p = 0{,}323$): ambas políticas resultaron difíciles de explotar más allá de su equilibrio de \textit{self-play}. La distinción no reside, por tanto, en cuánto se degrada cada política, sino en el \textbf{nivel absoluto} en que se estabiliza: el peor caso de MAPPO iguala el mejor caso típico de IPPO (Figura~\ref{fig:explotabilidad}). Se concluye que la aportación del crítico centralizado es un \textbf{piso de desempeño robusto} frente a un adversario óptimo, y que el margen sobre las heurísticas clínicas no constituye un artefacto del adversario débil empleado durante el entrenamiento.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{images/benchmark_exploit.png}
+\caption{Explotabilidad: caída del TTP-combinado desde el \textit{self-play} (rival co-entrenado) hasta el \textit{best-response} (atacante dedicado), por método. MAPPO (azul) conserva un piso muy por encima de la heurística de Gatenby; IPPO (gris) desciende hasta su nivel.}
+\label{fig:explotabilidad}
 \end{figure}
 
 En conjunto, los resultados muestran que la política aprendida por GBMARL extiende el tiempo de manejo clínico de forma significativa frente a las dos líneas base, mediante un mecanismo de dosificación pulsada interpretable, con una ventaja modesta del crítico centralizado y un ordenamiento robusto frente a la variación de los hiperparámetros, y ese ordenamiento se reproduce en una corrida completa de extremo a extremo bajo control de reproducibilidad.
