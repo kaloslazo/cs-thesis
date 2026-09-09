@@ -13,6 +13,8 @@ para el rollout. La física y los premios se replican 1:1 desde tumor_env.py.
 from __future__ import annotations
 import numpy as np
 from .config import Params, load_calibration
+from .outcomes import (ONGOING, classify_outcome, is_censored, is_failure,
+                       is_success, resistant_fraction)
 
 
 def _hill(c, ic50, delta_max, h):
@@ -86,6 +88,10 @@ class FastTumorEnv:
         self.S, self.R, self.c = self.S0, self.R0, 0.0
         self.day = 0
         self.agents = list(self.possible_agents)
+        self.t_load = None
+        self.t_resistance = None
+        self.last_outcome = ONGOING
+        self.last_info = {}
         return (self.S, self.R, self.c)
 
     def step(self, u, phi):
@@ -97,12 +103,31 @@ class FastTumorEnv:
         self.day += 1
 
         burden = S + R
-        fracR = R / (burden + 1e-9)
+        fracR = resistant_fraction(S, R)
         controlled = burden < self.prog_thr
         treatable = fracR < self.r_majority
         alive = controlled and treatable
         extinct = burden < self.eps
-        failure = not alive
+        if not controlled and self.t_load is None:
+            self.t_load = self.day
+        if not treatable and self.t_resistance is None:
+            self.t_resistance = self.day
+        outcome = classify_outcome(
+            progressed=not controlled,
+            untreatable=not treatable,
+            extinct=extinct,
+            reached_horizon=self.day >= self.horizon,
+        )
+        failure = is_failure(outcome)
+        self.last_outcome = outcome
+        self.last_info = {
+            "burden": float(burden), "R": float(R), "fracR": float(fracR),
+            "day": self.day, "progressed": bool(not controlled),
+            "untreatable": bool(not treatable), "failure_mode": outcome,
+            "is_failure": failure, "successful": is_success(outcome),
+            "censored": is_censored(outcome),
+            "t_load": self.t_load, "t_resistance": self.t_resistance,
+        }
 
         r_therapy = (self.control_bonus if alive else 0.0) - self.tox_weight * u
         r_tumor = fracR + (self.progression_bonus if failure else 0.0)
@@ -111,7 +136,7 @@ class FastTumorEnv:
             r_tumor -= self.win_bonus
 
         terminated = bool(extinct or failure)
-        truncated = bool(self.day >= self.horizon)
+        truncated = bool(is_censored(outcome) and not extinct)
         if terminated or truncated:
             self.agents = []
         return (S, R, c), float(r_therapy), float(r_tumor), terminated, truncated

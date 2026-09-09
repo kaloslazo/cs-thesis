@@ -23,6 +23,7 @@ import torch
 
 from gbmarl.fast_env import FastTumorEnv
 from gbmarl.mappo import Agent, _gae, _update
+from gbmarl.outcomes import ONGOING
 
 CKPT_DIR = "outputs/ckpt"
 
@@ -62,6 +63,13 @@ def train_job(job, variant, seed, target, budget, n_steps=2048, lr=3e-4,
         steps = ck["steps"]; hist = ck["hist"]
         S, R, c = ck["env_state"]; env.S, env.R, env.c = S, R, c
         env.day = ck["env_day"]; env.agents = ck["env_agents"]
+        # Estado auxiliar del episodio: no cambia la recompensa, pero sí es
+        # necesario para que los tiempos de carga/resistencia sean correctos
+        # al reanudar una ventana que terminó a mitad de episodio.
+        env.t_load = ck.get("t_load")
+        env.t_resistance = ck.get("t_resistance")
+        env.last_outcome = ck.get("last_outcome", ONGOING)
+        env.last_info = ck.get("last_info", {})
         ret_th, ret_tu = ck["ret_th"], ck["ret_tu"]
         rets_th, rets_tu = ck["rets_th"], ck["rets_tu"]
         if steps >= target:
@@ -121,6 +129,8 @@ def train_job(job, variant, seed, target, budget, n_steps=2048, lr=3e-4,
           "steps": steps, "hist": hist,
           "env_state": (env.S, env.R, env.c), "env_day": env.day,
           "env_agents": env.agents, "ret_th": ret_th, "ret_tu": ret_tu,
+          "t_load": env.t_load, "t_resistance": env.t_resistance,
+          "last_outcome": env.last_outcome, "last_info": env.last_info,
           "rets_th": rets_th, "rets_tu": rets_tu,
           "variant": variant, "seed": seed, "target": target, "centralized": centralized}
     with open(path, "wb") as f:

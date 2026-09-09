@@ -1,0 +1,47 @@
+{
+  "cells": {
+    "mappo@phi0.05@s0": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 0,
+      "ttp": 49,
+      "modo_falla": "load",
+      "gatenby_ttp_same_tumor": 6,
+      "gatenby_mode_same_tumor": "resistance",
+      "mtd_ttp_same_tumor": 6,
+      "mtd_mode_same_tumor": "resistance"
+    },
+    "mappo@phi0.05@s1": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 1,
+      "ttp": 61,
+      "modo_falla": "resistance",
+      "gatenby_ttp_same_tumor": 6,
+      "gatenby_mode_same_tumor": "resistance",
+      "mtd_ttp_same_tumor": 6,
+      "mtd_mode_same_tumor": "resistance"
+    },
+    "mappo@phi0.05@s2": {
+      "variant": "mappo",
+      "phi_max": 0.05,
+      "seed": 2,
+      "ttp": 24,
+      "modo_falla": "load",
+      "gatenby_ttp_same_tumor": 7,
+      "gatenby_mode_same_tumor": "resistance",
+      "mtd_ttp_same_tumor": 6,
+      "mtd_mode_same_tumor": "resistance"
+    }
+  },
+  "config": {
+    "version": 2,
+    "seeds": 15,
+    "steps": 120000,
+    "phi_maxes": [
+      0.05,
+      0.1,
+      0.2
+    ]
+  }
+}

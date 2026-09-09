@@ -1,7 +1,19 @@
-\chapter*{\center \Large RECOMENDACIONES} 
-\addcontentsline{toc}{section}{\bfseries RECOMENDACIONES} 
-\markboth{RECOMENDACIONES}{RECOMENDACIONES} 
+\chapter*{\center \Large RECOMENDACIONES}
+\addcontentsline{toc}{section}{\bfseries RECOMENDACIONES}
+\markboth{RECOMENDACIONES}{RECOMENDACIONES}
 
-Lorem ipsum dolor sit amet, mei no laboramus gloriatur, no timeam euripidis qui, eu eos aperiam patrioque accommodare. Mei probo accommodare an, ex case minim salutatus sit. Ad doming impetus mei, placerat verterem has no. His assum quaeque et, ea aliquid dissentiet eum. Copiosae evertitur cum te, sea clita disputationi ea.
+\begin{enumerate}
+  \item \textbf{Conservar la validación multi-semilla como resultado principal.} La corrida nominal vigente usa 15 semillas por variante con huella de calibración fija, horizonte y endpoint explícitos. Para una conclusión más estrecha, añadir intervalos de confianza y más semillas sin reemplazar la mediana, el rango y los modos de falla.
 
-Libris ridens malorum cu vis. Per vitae eirmod cotidieque cu. Cum unum mucius alterum eu, nam enim regione appellantur id. Cum putant dignissim te, est dolore essent definiebas ei. Facilisi convenire vix in, dictas delenit et per. Pro tota affert argumentum cu.
+  \item \textbf{Completar EXP-2 de manera simétrica.} Reentrenar MAPPO e IPPO para $\phi_{\max}=0{,}10$ y $0{,}20$, incluir las mismas semillas y evaluar también las líneas base frente a adversarios comparables. La corrida actual de $0{,}05$ debe considerarse parcial hasta completar esas celdas.
+
+  \item \textbf{Fortalecer la robustez adversarial.} Ejecutar el benchmark V2 con múltiples reinicios del adversario, incluir el compañero de self-play y realizar cross-play entre políticas. Una sola best-response aproximada no constituye un peor caso ni una prueba suficiente de seguridad.
+
+  \item \textbf{Mejorar la calibración biológica.} Separar en el reporte qué parámetros provienen de datos, cuáles de literatura y cuáles de normalización. Cuando sea posible, incorporar curvas dosis--respuesta por línea, incertidumbre bootstrap, datos temporales de crecimiento y mediciones de eliminación del fármaco, en lugar de tratar la brecha de IC50 como identificación completa de la dinámica.
+
+  \item \textbf{Implementar la salud del paciente como un módulo validado, no como una penalización arbitraria.} La salud debe representar variables observables y clínicamente interpretables, por ejemplo toxicidad hematológica acumulada, función orgánica y calidad de vida. Cada componente necesita escala, horizonte temporal, umbral y fuente de calibración; la recompensa debe incluir una restricción o presupuesto de toxicidad separado del TTP. Hasta contar con esos datos, la salud debe permanecer como análisis de sensibilidad y no como conclusión clínica.
+
+  \item \textbf{Ampliar la evaluación externa.} Comparar las políticas con control óptimo, búsqueda evolutiva y otros algoritmos de RL; realizar validación fuera de muestra por línea celular; y probar escenarios con variabilidad de parámetros, observación parcial, retrasos de medición y errores de adherencia. Estas pruebas ayudarán a distinguir una política que aprendió una estrategia general de una que explotó una regularidad particular del simulador.
+
+  \item \textbf{Mantener la trazabilidad de resultados.} Cada tabla o figura debe indicar la fecha, la huella de calibración, el número de semillas, el adversario, el horizonte y si el resultado es histórico, parcial o vigente. Los artefactos históricos no deben mezclarse con la corrida calibrada actual.
+\end{enumerate}

@@ -19,18 +19,24 @@ dR/dt = α_R·R·(1 − (S+R)/K) − δ_R(c)·R + φ·S
 dc/dt = −λ_c·c + u(t)
 ```
 
-## Hallazgo central (con la métrica CORRECTA, n=15)
+## Hallazgo vigente (auditoría calibrada del 2026-09-08, métrica CORRECTA, n=15)
 ```
-MAPPO-CTDE: 33.5 ± 5.8 días   (p<0.001 vs baselines)
-IPPO:       30.2 días
+MAPPO-CTDE: 34 días [27,41]    (13/15 > Gatenby)
+IPPO:       31 días [23,34]    (12/15 > Gatenby)
 Gatenby:    27 días
 MTD:        13 días
 Sin tratar: 12 días
 ```
+- La comparación MAPPO--IPPO da `p=0.013759` en Wilcoxon pareado unilateral, pero
+  sigue siendo evidencia del simulador, no eficacia clínica. La corrida histórica de
+  `n=15` queda documentada como histórica y no debe mezclarse con esta auditoría.
 - **Framing honesto: retrasar, no curar.** Con la calibración real del GBM, la resistencia es inevitable bajo cualquier tratamiento (nadie llega al horizonte). El objetivo y la métrica miden *demora*, no reducción.
-- **Mecanismo aprendido:** dosificación pulsada/intermitente que preserva sensibles competidoras (terapia adaptativa redescubierta).
-- **CTDE vs IPPO:** con la métrica correcta MAPPO supera a IPPO, pero el margen es estrecho (borderline a n=5–15). Reportar honesto; citar de Witt 2020.
-- **Bimodalidad:** el self-play cae en cuencas distintas según semilla. Reportar **tasa de éxito**, no media±std (el t-test rompe con varianza cero → usar Fisher/descriptivo).
+- **Mecanismo candidato:** la política nominal usa dosis baja/intermitente compatible con preservar sensibles competidoras; esto es una interpretación del simulador, no una demostración clínica.
+- **CTDE vs IPPO:** con la métrica correcta MAPPO supera a IPPO en esta muestra de 15 pares; la diferencia sigue siendo evidencia del simulador, no eficacia clínica.
+- **Variabilidad:** el self-play puede caer en cuencas distintas según semilla. Reportar mediana, rango y tasa de éxito; no ocultar la dispersión con una sola mejor corrida.
+- **EXP-1:** la mediana de MAPPO fue 34 días en el nominal, cayó a 25 días al reducir `K` a `0.8K`, y en la perturbación conjunta llegó a una mediana de medianas de 30 días; hubo entornos con 0% de éxito frente a Gatenby.
+- **EXP-2:** con la calibración vigente y 15 semillas por celda, MAPPO obtiene medianas 44, 28 y 24 días para `phi_max={0.05,0.10,0.20}`, mientras IPPO obtiene 29, 27 y 26 días. La ventaja de CTDE es clara en `0.05` y desaparece al fortalecer el adversario; no debe presentarse como universal.
+- **Benchmark V2:** frente a cinco reinicios de best-response, MAPPO alcanza TTP 14 [11,14] e IPPO 11 [10,12]; la explotabilidad puntual es mayor en MAPPO (30 vs. 18 días), aunque la prueba unilateral MAPPO<IPPO no es significativa (`p=0.993`). En cross-play, MAPPO obtiene 35 [24,41] frente a tumores IPPO e IPPO 27 [12,29] frente a tumores MAPPO.
 
 ## Decisiones bloqueadas (NO re-debatir salvo error)
 1. **Método titular = MAPPO (CTDE):** crítico centralizado condicionado al estado conjunto en entrenamiento, actores con obs local en ejecución, vía self-play. **IPPO está implementado** (flag `centralized=False` en `train_mappo`) **como la ablación CTDE** — es parte del experimento, no está prohibido.
@@ -38,7 +44,7 @@ Sin tratar: 12 días
 3. **Un solo framework.** Implementación propia en PyTorch (referencia: CleanRL). PROHIBIDO el SB3 self-play alternado del código viejo (no es MARL).
 4. Entorno = PettingZoo `ParallelEnv`, 2 agentes (`"therapy"`, `"tumor"`).
 5. Estado dinámico real = **3-D** (S, R, c). Los genes GBM son contexto estático (condicionan params iniciales vía calibración), no evolucionan en el episodio.
-6. **Calibración:** la columna de datos `LN_IC50` deriva la *potencia* del fármaco (IC50 de cada población, brecha S/R). El techo de muerte (`delta_max`) se ancla a literatura vía `KILL_TO_GROWTH_RATIO=2.0`. NO confundir esto con la recompensa del entorno (ver punto 9).
+6. **Calibración:** la columna de datos `LN_IC50` deriva la *potencia* relativa del fármaco (IC50 de cada población, brecha S/R). El techo de muerte (`delta_max`) se ancla al crecimiento vía `KILL_TO_GROWTH_RATIO=2.0`, mientras que `delta_max_R` incorpora una eficacia resistente derivada de los datos con piso explícito. NO confundir esto con la recompensa del entorno (ver punto 9).
 7. La acción del Agente Tumor **debe estar acotada** (`phi_max`) con costo de fitness. Adversario sin restricción = hombre de paja. (Nota: el adversario resultó *débil* aun acotado — fortalecerlo es trabajo futuro abierto.)
 8. **Objetivo = retrasar la intratabilidad, NO curar/reducir.** Minimizar carga es la trampa (es lo que hace MTD y por eso pierde). No premiar reducción de tumor.
 9. **Recompensa del entorno:** `+control_bonus` por día CONTROLADO (carga<prog_thr) **Y** TRATABLE (fracR<r_majority), menos `tox_weight·u`. El episodio termina si falla cualquiera. Params: `tox_weight=0.05`, `r_majority=0.50`, `control_bonus=1.0`, `progression_bonus=10`, `win_bonus=50`, `prog_thr=0.80·K`, `S0=0.40`, `R0=0.01`, `horizon=180`, `dt=0.1`, `phi_max=0.05`, `ent_coef=0.01`.
@@ -67,6 +73,8 @@ thesis-code/
 │   ├── ppo.py              PPO single-agent
 │   ├── mappo.py            MAPPO/IPPO (flag centralized), train_mappo
 │   ├── evalutils.py        ttp_combinado + Gatenby (MÉTRICA CORRECTA)
+│   ├── outcomes.py         diagnóstico único de desenlaces y censura
+│   └── patient_env.py      extensión experimental de salud/toxicidad
 │   └── tests/              test_dynamics.py · test_env.py
 ├── scripts/   build_dataset.py · calibrate.py · plot_dynamics.py
 │   train_ppo.py · train_mappo.py · evaluate.py
@@ -82,7 +90,7 @@ dynamics → config → tumor_env → **ppo single-agent (de-riskea entorno)** �
 
 ## Comandos (desde la raíz)
 ```bash
-python -m pytest -v                          # 10/10 tests
+python -m pytest -v                          # 26/26 tests
 python scripts/build_dataset.py              # dataset + nº líneas GBM
 python scripts/calibrate.py                  # calibration.json
 python scripts/train_ppo.py                  # fase single-agent
@@ -91,16 +99,20 @@ python scripts/evaluate.py                   # comparación TTP + figuras
 python scripts/validate_seeds.py --seeds 15  # significancia multi-semilla
 python scripts/ablation_ctde.py --seeds 15   # MAPPO vs IPPO
 python scripts/diagnose.py --seeds 5         # auditoría: arquitectura + métrica + modos de falla
-cd thesis-latex && tectonic main.tex
+cd thesis-latex && pdflatex -interaction=nonstopmode -halt-on-error main.tex
 ```
 
 ## Estado y pendientes
-- [✅] simulador + calibración · entorno · PPO · MAPPO/IPPO · evaluación · validación multi-semilla · ablación CTDE · métrica auditada · reproducibilidad.
-- [✅] LaTeX: Cap.1 (Introducción) y Cap.2 (Revisión de la Literatura) redactados.
-- [ ] Análisis de sensibilidad (¿el ranking sobrevive al variar KILL_TO_GROWTH_RATIO, umbrales, phi_max?).
-- [ ] Horizonte 360d (¿contención real o tope?).
-- [ ] Adversario más fuerte (palanca extra para el tumor — abre la pregunta de cuándo importa CTDE).
-- [ ] LaTeX: Cap.3 (Metodología) y Cap.4 (Resultados).
+- [✅] datos oficiales DepMap Public 26Q1 + GDSC2 release 8.5, cruce trazable y calibración reproducible.
+- [✅] simulador + entorno + PPO + MAPPO/IPPO + evaluación + métrica auditada + equivalencia FastTumorEnv/TumorEnv.
+- [✅] comparación nominal calibrada con 15 semillas por variante: MAPPO 34 d [27,41], IPPO 31 d [23,34].
+- [✅] EXP-1 calibrado: perturbación OAT/conjunta, umbrales del endpoint y ruido de observación.
+- [✅] LaTeX: Capítulos I--IV, resumen, abstract, conclusiones y recomendaciones sin placeholders; PDF compilado sin referencias indefinidas.
+- [✅] Validación nominal pre-registrada con 15 semillas bajo la huella actual; mantener la lectura como evidencia in silico y ampliar solo si se requieren intervalos más estrechos.
+- [✅] Completar EXP-2 para `phi_max ∈ {0.05, 0.10, 0.20}` con 90/90 celdas, 15 semillas por método y contrastes pareados con Holm.
+- [✅] Ejecutar benchmark V2 de explotabilidad con 5 reinicios, `n=15` y cross-play bajo la huella actual; el resultado no demuestra robustez universal.
+- [ ] Calibrar la variable de salud con datos longitudinales de toxicidad antes de interpretarla clínicamente.
+- [✅] Evaluar horizonte 360d: sin tratamiento/MTD/Gatenby/MAPPO fallan antes del horizonte (12/13/27/41 d); no hay censura administrativa en las trayectorias auditadas.
 
 ## Convenciones
 - Python 3.9+ (Mac), type hints, docstrings cortos en español.

@@ -19,6 +19,8 @@ from pettingzoo import ParallelEnv
 
 from .config import Params, load_calibration
 from .dynamics import rk4_step
+from .outcomes import (ONGOING, classify_outcome, is_censored, is_failure,
+                       is_success, resistant_fraction)
 
 
 class TumorEnv(ParallelEnv):
@@ -64,6 +66,9 @@ class TumorEnv(ParallelEnv):
         self.agents = list(self.possible_agents)
         self.state = np.array([self.S0, self.R0, 0.0], dtype=float)
         self.day = 0
+        self.t_load = None
+        self.t_resistance = None
+        self.last_outcome = ONGOING
         return self._obs(), {a: {} for a in self.agents}
 
     def step(self, actions):
@@ -76,12 +81,24 @@ class TumorEnv(ParallelEnv):
 
         S, R, c = self.state
         burden = S + R
-        fracR = R / (burden + 1e-9)
+        fracR = resistant_fraction(S, R)
         controlled = burden < self.prog_thr            # tumor no progresó en tamaño
         treatable = fracR < self.r_majority            # resistentes NO son mayoría
         alive = controlled and treatable               # ambas condiciones clínicas
         extinct = burden < self.eps
-        failure = not alive                            # progresó O se volvió intratable
+        if not controlled and self.t_load is None:
+            self.t_load = self.day
+        if not treatable and self.t_resistance is None:
+            self.t_resistance = self.day
+
+        outcome = classify_outcome(
+            progressed=not controlled,
+            untreatable=not treatable,
+            extinct=extinct,
+            reached_horizon=self.day >= self.horizon,
+        )
+        failure = is_failure(outcome)
+        self.last_outcome = outcome
 
         # Terapia: +1 por cada día CONTROLADO Y TRATABLE, menos toxicidad.
         # Maximiza el tiempo que el tumor sigue siendo manejable (retrasar resistencia).
@@ -95,13 +112,18 @@ class TumorEnv(ParallelEnv):
 
         rewards = {"therapy": float(r_therapy), "tumor": float(r_tumor)}
         terminated = bool(extinct or failure)
-        truncated = bool(self.day >= self.horizon)
+        # Un fracaso ocurrido en el último día sigue siendo evento, no censura.
+        truncated = bool(is_censored(outcome) and not extinct)
         terms = {a: terminated for a in self.agents}
         truncs = {a: truncated for a in self.agents}
         obs = self._obs()
         infos = {a: {"burden": float(burden), "R": float(R), "fracR": float(fracR),
                      "day": self.day, "progressed": bool(not controlled),
-                     "untreatable": bool(not treatable)} for a in self.agents}
+                     "untreatable": bool(not treatable), "failure_mode": outcome,
+                     "is_failure": failure, "successful": is_success(outcome),
+                     "censored": is_censored(outcome),
+                     "t_load": self.t_load, "t_resistance": self.t_resistance}
+                 for a in self.agents}
 
         if terminated or truncated:
             self.agents = []

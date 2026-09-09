@@ -196,15 +196,15 @@ Dado que el entrenamiento adversarial por \emph{self-play} es intrínsecamente i
 
 \subsection{Métrica de progresión auditada}
 
-El desenlace se mide con el \textbf{tiempo a falla combinado} (TTP-combinado): el número de días hasta que el tumor deja de estar controlado~\eqref{eq:controlado} \emph{o} deja de ser tratable~\eqref{eq:tratable}, lo que ocurra primero, reportando además el \emph{motivo} de falla (progresión en carga, mayoría resistente o supervivencia al horizonte). Esta métrica es clínicamente honesta por construcción y evita un artefacto sutil: una métrica basada únicamente en la resistencia asignaría falsamente el valor del horizonte a un episodio que en realidad falló por progresión de carga, inflando los resultados. Toda evaluación reporta el modo de falla para permitir su auditoría.
+El desenlace se mide con el \textbf{tiempo a falla combinado} (TTP-combinado): el número de días hasta que el tumor deja de estar controlado~\eqref{eq:controlado} \emph{o} deja de ser tratable~\eqref{eq:tratable}, lo que ocurra primero, reportando además el \emph{motivo} de falla (progresión en carga, mayoría resistente o supervivencia al horizonte). Esta métrica está alineada con el objetivo de control y evita un artefacto sutil: una métrica basada únicamente en la resistencia asignaría falsamente el valor del horizonte a un episodio que en realidad falló por progresión de carga, inflando los resultados. No constituye un endpoint clínico validado; toda evaluación reporta el modo de falla para permitir su auditoría.
 
 \subsection{Líneas base y validación}
 
-La política aprendida se compara contra tres referencias deterministas evaluadas sobre el mismo simulador y bajo la misma métrica: la ausencia de tratamiento ($u \equiv 0$), la dosis máxima tolerada ($u \equiv u_{\max}$), y la terapia adaptativa heurística de Gatenby (dosificación de encendido/apagado según umbrales de carga)~\cite{Gallaher2017,Stankova2019}. La validación se realiza sobre múltiples semillas independientes; dado que el \emph{self-play} produce resultados bimodales, los resultados se reportan por tasa de éxito y mediana, en lugar de promedios que serían engañosos para una distribución bimodal, y la significancia frente a las líneas base se contrasta con pruebas apropiadas para varianza no homogénea.
+La política aprendida se compara contra tres referencias deterministas evaluadas sobre el mismo simulador y bajo la misma métrica: la ausencia de tratamiento ($u \equiv 0$), la dosis máxima tolerada ($u \equiv u_{\max}$), y la terapia adaptativa heurística de Gatenby (dosificación de encendido/apagado según umbrales de carga)~\cite{Gallaher2017,Stankova2019}. La validación se realiza sobre múltiples semillas independientes. Cuando se observa dispersión o posible bimodalidad en el \emph{self-play}, los resultados se reportan por mediana, rango y tasa de éxito, en lugar de depender de un promedio; los contrastes estadísticos se interpretan de acuerdo con el tamaño muestral y el diseño pareado.
 
 \subsection{Estudios de ablación y sensibilidad}
 
-Dos estudios complementan la validación principal. El \textbf{estudio de ablación} compara MAPPO (crítico centralizado) frente a IPPO (crítico local) sobre las mismas semillas, aislando la contribución de CTDE. El \textbf{análisis de sensibilidad} varía, una a la vez, las constantes elegidas a mano ---la fuerza del adversario $\phi_{\max}$, los umbrales de evaluación $\theta_{\text{prog}}$ y $\rho_{\text{may}}$, el peso de toxicidad $w_{\text{tox}}$, la potencia del fármaco $\delta_S^{\max}$ y la brecha de resistencia $\mathrm{IC50}_R$--- alrededor de su valor por defecto, para verificar que el ordenamiento entre estrategias es robusto y no depende de la elección particular de hiperparámetros. Los resultados de ambos estudios se presentan en el Capítulo~\ref{cap:resultados}.
+Dos estudios complementan la validación principal. El \textbf{estudio de ablación} compara MAPPO (crítico centralizado) frente a IPPO (crítico local) sobre las mismas semillas, aislando la contribución de CTDE. El \textbf{análisis de sensibilidad} varía, una a la vez, ocho parámetros de dinámica y fármaco alrededor de su valor nominal, y añade perturbación conjunta, ruido relativo de observación y sensibilidad de los umbrales del endpoint. El objetivo es verificar en qué condiciones se conserva el ordenamiento entre estrategias y localizar sus fragilidades, no asumir robustez por defecto. Los resultados se presentan en el Capítulo~\ref{cap:resultados} y en los reportes reproducibles del código.
 
 \section{Pipeline experimental reproducible}
 \label{sec:pipeline}
@@ -213,7 +213,7 @@ Las secciones anteriores describen los componentes de GBMARL de forma aislada. E
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{images/pipeline_diagram.png}
+\includegraphics[width=0.85\textwidth]{images/pipeline_diagram.png}
 \caption{Pipeline experimental reproducible de GBMARL. Cada fase de-riskea la siguiente: los datos calibran el simulador, el simulador se valida con pruebas unitarias, un agente único (PPO) confirma que el entorno es aprendible antes de introducir el segundo agente, el modelo titular (MAPPO) se contrasta con su ablación (IPPO) y, finalmente, todo se evalúa con la métrica auditada frente a las líneas base. El objetivo transversal es \emph{retrasar} la intratabilidad, no reducir el tumor.}
 \label{fig:pipeline}
 \end{figure}

@@ -41,7 +41,8 @@ def main():
     print(f"Entrenando semilla {args.seed}...")
     th, tu, _ = train_mappo(env, total_timesteps=args.steps, seed=args.seed, verbose=False)
     S, R, C, U, PHI = rollout(env, th, tu)
-    fracR = R / (S + R + 1e-9)
+    burden = S + R
+    fracR = np.divide(R, burden, out=np.zeros_like(R), where=burden > 0)
     ttp = int(np.argmax(fracR > env.r_majority)) if (fracR > env.r_majority).any() else len(S)
 
     print("=" * 56)

@@ -16,7 +16,7 @@ pasan desde afuera, por eso se testea solo.
 """
 from __future__ import annotations
 import numpy as np
-from .config import Params
+from .config import Params, ToxicityParams
 
 
 def hill(c: float, ic50: float, delta_max: float, h: float) -> float:
@@ -49,6 +49,46 @@ def rk4_step(state, u: float, phi: float, dt: float, p: Params):
     k4 = derivatives(s + dt * k3, u, phi, p)
     s_next = s + dt / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
     return np.maximum(s_next, 0.0)
+
+
+def toxicity_exposure(c: float, half_saturation: float) -> float:
+    """Exposición normalizada y acotada derivada de la concentración del fármaco."""
+    c = max(float(c), 0.0)
+    return c / (half_saturation + c)
+
+
+def toxicity_derivative(toxicity: float, concentration: float,
+                        tp: ToxicityParams) -> float:
+    """Acumulación con recuperación; [0,1] es invariante en la EDO continua."""
+    exposure = toxicity_exposure(concentration, tp.half_saturation)
+    return (tp.accumulation_rate * exposure * (1.0 - toxicity)
+            - tp.recovery_rate * toxicity)
+
+
+def derivatives_with_toxicity(state, u: float, phi: float, p: Params,
+                              tp: ToxicityParams):
+    """Dinámica conjunta [S, R, c, A], donde A es toxicidad acumulada."""
+    base = derivatives(np.asarray(state[:3], dtype=float), u, phi, p)
+    dA = toxicity_derivative(float(state[3]), float(state[2]), tp)
+    return np.array([base[0], base[1], base[2], dA], dtype=float)
+
+
+def rk4_step_with_toxicity(state, u: float, phi: float, dt: float,
+                           p: Params, tp: ToxicityParams):
+    """Paso RK4 acoplado para tumor, farmacocinética y toxicidad."""
+    state = np.asarray(state, dtype=float)
+
+    def f(value):
+        return derivatives_with_toxicity(value, u, phi, p, tp)
+
+    k1 = f(state)
+    k2 = f(state + dt * k1 / 2)
+    k3 = f(state + dt * k2 / 2)
+    k4 = f(state + dt * k3)
+    nxt = state + dt * (k1 + 2 * k2 + 2 * k3 + k4) / 6
+    nxt[:3] = np.maximum(nxt[:3], 0.0)
+    nxt[3] = np.clip(nxt[3], 0.0, 1.0)
+    return nxt
 
 
 def simulate(state0, dose_fn, phi_fn, n_days: int, dt: float = 0.1, p: Params | None = None):

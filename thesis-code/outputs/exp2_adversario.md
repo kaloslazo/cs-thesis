@@ -1,5 +1,9 @@
 # EXP-2 Adversario fortalecido — resultados
 
+> **Histórico:** estas cifras pertenecen a una configuración anterior. No son
+> resultados de la auditoría calibrada del 2026-09-08; EXP-2 vigente está
+> recalculado únicamente para $\phi_{\max}=0{,}05$.
+
 Semillas n=15 · pasos=120000 · TTP vs tumor adaptativo co-entrenado
 
 

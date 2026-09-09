@@ -1,25 +1,52 @@
-\customchapter{INTRODUCCIÓN} 
+\customchapter{INTRODUCCIÓN}
 
 \introsection{Presentación del tema de investigación}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nec massa venenatis, sodales magna id, tempus lacus. Nullam nec dolor eu ex luctus molestie. Ut quam libero, tristique et efficitur at, consequat vel velit. Aliquam non sem eu libero aliquet condimentum. Curabitur lobortis neque purus, vel pellentesque lorem tincidunt a. Pellentesque vitae nunc luctus, rutrum sapien sit amet, cursus eros. In tempus, nulla sit amet pharetra iaculis, urna odio dapibus quam, sed commodo magna massa sit amet sem. Proin id finibus nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+El glioblastoma multiforme (GBM) es uno de los tumores cerebrales primarios más agresivos en adultos. A pesar del tratamiento multimodal, la recaída es frecuente y la resistencia a los fármacos limita la duración del control logrado con temozolomida (TMZ)~\cite{Tan2020,Sipos2025,Adegboyega2021}. El protocolo de Stupp combina resección quirúrgica, radioterapia y TMZ, pero no elimina el problema evolutivo: las células con mayor tolerancia al tratamiento pueden expandirse durante la terapia~\cite{Stupp2005,Jezierzanski2024}.
 
-\introsection{ Descripción de la situación problemática}
+La terapia adaptativa propone controlar el tumor sin ejercer una presión selectiva innecesariamente intensa. Su principio es conservar una población sensible que compita con las células resistentes, modulando la dosis según la evolución del sistema~\cite{Gatenby2022,Gallaher2017,Strobl2020}. Este enfoque no busca prometer una curación en un modelo reducido, sino estudiar si es posible retrasar el momento en que el tumor deja de ser controlable o tratable.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nec massa venenatis, sodales magna id, tempus lacus. Nullam nec dolor eu ex luctus molestie. Ut quam libero, tristique et efficitur at, consequat vel velit. Aliquam non sem eu libero aliquet condimentum. Curabitur lobortis neque purus, vel pellentesque lorem tincidunt a. Pellentesque vitae nunc luctus, rutrum sapien sit amet, cursus eros. In tempus, nulla sit amet pharetra iaculis, urna odio dapibus quam, sed commodo magna massa sit amet sem. Proin id finibus nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+Esta tesis estudia ese problema mediante GBMARL, un marco de aprendizaje por refuerzo multiagente adversarial. En el modelo, un agente de terapia decide la dosis de TMZ y un agente tumoral modifica la transición fenotípica de células sensibles a resistentes. Ambos interactúan sobre un simulador dinámico de dos poblaciones tumorales, y la política de terapia se aprende mediante MAPPO con entrenamiento centralizado y ejecución descentralizada (CTDE).
+
+\introsection{Descripción de la situación problemática}
+
+Los modelos computacionales de dosificación suelen tratar la evolución tumoral como una dinámica fija o evaluar el éxito únicamente por la reducción inmediata de la carga. Esa simplificación puede favorecer a la dosis máxima tolerada (MTD): reduce el tumor al inicio, pero elimina la competencia sensible y puede acelerar la dominancia resistente. Por otro lado, las heurísticas adaptativas incorporan una intuición evolutiva útil, aunque no optimizan explícitamente sus decisiones ni representan al tumor como un adversario que aprende.
+
+El problema de investigación consiste, por tanto, en diseñar y evaluar un entorno donde la terapia y la respuesta evolutiva del tumor estén acopladas, y donde la métrica de éxito refleje la duración del control clínicamente relevante. Para evitar que una estrategia sea premiada por mantener una carga baja cuando ya es predominantemente resistente, la tesis emplea el tiempo a falla combinado (TTP-combinado): el episodio termina por progresión de carga o por mayoría resistente, y registra cuál de los dos eventos ocurrió primero.
 
 \introsection{Formulación del problema}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nec massa venenatis, sodales magna id, tempus lacus. Nullam nec dolor eu ex luctus molestie. Ut quam libero, tristique et efficitur at, consequat vel velit. Aliquam non sem eu libero aliquet condimentum. Curabitur lobortis neque purus, vel pellentesque lorem tincidunt a. Pellentesque vitae nunc luctus, rutrum sapien sit amet, cursus eros. In tempus, nulla sit amet pharetra iaculis, urna odio dapibus quam, sed commodo magna massa sit amet sem. Proin id finibus nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+La pregunta central es:
+
+\begin{quote}
+\emph{¿En qué medida un marco de aprendizaje por refuerzo multiagente adversarial, entrenado sobre un simulador de GBM calibrado con datos reales de sensibilidad a TMZ, permite descubrir políticas de dosificación adaptativa que retrasen la intratabilidad frente a la MTD y a la heurística de Gatenby, y qué aporte adicional ofrece el crítico centralizado frente al aprendizaje independiente?}
+\end{quote}
+
+La comparación se formula como una evaluación \emph{in silico}. La calibración usa datos de sensibilidad farmacológica de GDSC2 y anotación de líneas celulares de DepMap; no pretende convertir esos datos \emph{in vitro} en evidencia clínica individual. Los parámetros que no están identificados por esas fuentes se mantienen como supuestos explícitos del modelo y se someten a análisis de sensibilidad.
 
 \introsection{Objetivos de investigación}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nec massa venenatis, sodales magna id, tempus lacus. Nullam nec dolor eu ex luctus molestie. Ut quam libero, tristique et efficitur at, consequat vel velit. Aliquam non sem eu libero aliquet condimentum. Curabitur lobortis neque purus, vel pellentesque lorem tincidunt a. Pellentesque vitae nunc luctus, rutrum sapien sit amet, cursus eros. In tempus, nulla sit amet pharetra iaculis, urna odio dapibus quam, sed commodo magna massa sit amet sem. Proin id finibus nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+\subsection*{Objetivo general}
+
+Diseñar y evaluar GBMARL para descubrir políticas de dosificación adaptativa contra la resistencia evolutiva del GBM, utilizando un simulador de dinámica sensible--resistente calibrado con datos reales y una métrica de tiempo a falla combinado.
+
+\subsection*{Objetivos específicos}
+
+\begin{enumerate}
+  \item Construir un simulador de dos poblaciones tumorales acoplado a la farmacodinámica de TMZ, y derivar la potencia relativa del fármaco a partir de datos de GDSC2 cruzados con DepMap~\cite{GDSC,DepMap}.
+  \item Implementar un entorno multiagente con observabilidad parcial para la terapia, un agente tumoral adversarial y entrenamiento MAPPO-CTDE, junto con una variante IPPO para la ablación.
+  \item Comparar las políticas aprendidas con ausencia de tratamiento, MTD y la heurística de Gatenby mediante TTP-combinado y modo de falla.
+  \item Estudiar la variabilidad entre semillas, la sensibilidad a parámetros y el efecto del crítico centralizado, reportando los límites de validez del resultado.
+\end{enumerate}
 
 \introsection{Justificación}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nec massa venenatis, sodales magna id, tempus lacus. Nullam nec dolor eu ex luctus molestie. Ut quam libero, tristique et efficitur at, consequat vel velit. Aliquam non sem eu libero aliquet condimentum. Curabitur lobortis neque purus, vel pellentesque lorem tincidunt a. Pellentesque vitae nunc luctus, rutrum sapien sit amet, cursus eros. In tempus, nulla sit amet pharetra iaculis, urna odio dapibus quam, sed commodo magna massa sit amet sem. Proin id finibus nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+El valor de este trabajo es metodológico. Un simulador explícito permite separar la potencia farmacológica respaldada por datos de los supuestos sobre crecimiento, competencia y eliminación del fármaco. El juego adversarial permite evaluar si la política conserva su desempeño cuando la respuesta tumoral no es pasiva. Finalmente, TTP-combinado hace visible un error que una métrica aislada de carga ocultaría: una estrategia puede producir una carga pequeña y, al mismo tiempo, haber perdido la capacidad de controlar la población resistente.
 
-\introsection{Alcance y limitaciones / restricciones} %[opcional]
+El marco también ofrece un procedimiento reproducible para estudiar políticas adaptativas antes de cualquier consideración clínica. Sus resultados no sustituyen ensayos celulares, modelos animales ni estudios clínicos; ayudan a identificar hipótesis de dosificación, condiciones de fallo y parámetros que requieren mejor medición.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nec massa venenatis, sodales magna id, tempus lacus. Nullam nec dolor eu ex luctus molestie. Ut quam libero, tristique et efficitur at, consequat vel velit. Aliquam non sem eu libero aliquet condimentum. Curabitur lobortis neque purus, vel pellentesque lorem tincidunt a. Pellentesque vitae nunc luctus, rutrum sapien sit amet, cursus eros. In tempus, nulla sit amet pharetra iaculis, urna odio dapibus quam, sed commodo magna massa sit amet sem. Proin id finibus nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+\introsection{Alcance y limitaciones / restricciones}
+
+El estudio se restringe a un modelo no espacial de dos poblaciones, un único fármaco (TMZ), una dinámica determinista con integración RK4 y un entorno de horizonte finito. El agente de terapia observa carga total y concentración del fármaco, pero no la fracción resistente directamente; el agente tumoral controla una tasa acotada de transición fenotípica. La calibración vigente integra DepMap Public 26Q1 y GDSC2 release 8.5, con 67 líneas GBM catalogadas, 34 con ensayos de sensibilidad y 24 con expresión completa.
+
+Las cifras actuales se obtuvieron con quince semillas por variante y 120\,832 pasos efectivos por corrida. Esta muestra permite estimar la dispersión del entrenamiento, pero no es suficiente para una afirmación clínica ni para establecer universalidad estadística. La sensibilidad muestra además que la ventaja nominal puede desaparecer bajo cambios desfavorables de la capacidad de carga $K$ o de otros parámetros. La variable de salud del paciente no se interpreta como clínicamente calibrada: requiere datos de toxicidad y una definición clínica validada antes de incorporarse como conclusión del estudio.

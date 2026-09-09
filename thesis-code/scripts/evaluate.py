@@ -3,17 +3,23 @@ evaluate.py — M5: compara estrategias en DOS métricas, contra el mismo tumor.
 Ejecutar desde la raíz:  python scripts/evaluate.py
 
   · TTP-carga      : días hasta que la carga total (S+R) cruza el umbral.
-  · TTP-resistencia: días hasta que las resistentes son MAYORÍA (R/(S+R) > 0.5).
-                     = cuándo el tumor se vuelve intratable. ESTA es la clínica.
+  · TTP-resistencia: diagnóstico del primer día en que las resistentes alcanzan
+                     la mayoría, según el estado registrado por TumorEnv.
+                     El TTP principal es el combinado, que también considera carga.
   · Frac. R final  : qué tan resistente quedó el tumor.
 
 Estrategias: sin tratamiento, MTD, adaptativa (Gatenby), y MAPPO (si hay modelo).
 """
 import os
 import sys
+import tempfile
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
+# Algunos entornos de ejecución no permiten escribir en la caché global de
+# Matplotlib. Usar una caché temporal evita ruido y mantiene el script portable.
+os.environ.setdefault("MPLCONFIGDIR", os.path.join(tempfile.gettempdir(), "gbmarl-mpl"))
+os.makedirs(os.environ["MPLCONFIGDIR"], exist_ok=True)
 import matplotlib.pyplot as plt
 from gbmarl.tumor_env import TumorEnv
 
@@ -42,25 +48,28 @@ def rollout(env, therapy_fn, tumor_fn=lambda s: FIXED_PHI):
         obs, rew, term, trunc, info = env.step({"therapy": np.array([u], np.float32),
                                                 "tumor": np.array([phi], np.float32)})
         state = obs["therapy"]; traj.append(state.copy())
-        S, R = state[0], state[1]; day = info["therapy"]["day"]
-        fracR = R / (S + R + 1e-9)
-        if info["therapy"]["progressed"] and ttp_load == env.horizon:
-            ttp_load = day
-        if fracR > R_MAJORITY and ttp_res == env.horizon:
-            ttp_res = day
+        event_info = info["therapy"]
+        # Reutilizar los eventos calculados por TumorEnv evita que este script
+        # tenga una convención distinta en el borde fracR=0.50 o en eventos
+        # simultáneos. El TTP combinado vive en gbmarl.evalutils.
+        if event_info.get("t_load") is not None:
+            ttp_load = int(event_info["t_load"])
+        if event_info.get("t_resistance") is not None:
+            ttp_res = int(event_info["t_resistance"])
         done = (term.get("therapy", True) if term else True) or \
                (trunc.get("therapy", True) if trunc else True)
     traj = np.array(traj)
-    fracR_final = traj[-1, 1] / (traj[-1, 0] + traj[-1, 1] + 1e-9)
+    final_burden = traj[-1, 0] + traj[-1, 1]
+    fracR_final = traj[-1, 1] / final_burden if final_burden > 0 else 0.0
     return ttp_load, ttp_res, fracR_final, traj
 
 
-def load_mappo(env):
+def load_mappo(env, model_path="outputs/models/mappo_therapy.pt"):
     try:
         import torch
         from gbmarl.mappo import Agent, obs_therapy
         th = Agent(2, 3, 1, env.action_space("therapy").low, env.action_space("therapy").high)
-        th.load_state_dict(torch.load("outputs/models/mappo_therapy.pt")); th.eval()
+        th.load_state_dict(torch.load(model_path, weights_only=True)); th.eval()
         def policy(state):
             with torch.no_grad():
                 a = th.actor_mean(torch.tensor(obs_therapy(state))).clamp(th.a_low, th.a_high)
@@ -71,11 +80,20 @@ def load_mappo(env):
 
 
 def main():
-    env = TumorEnv(horizon_days=180)
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", default="outputs/models/mappo_therapy.pt",
+                    help="checkpoint de la política MAPPO; se omite para evaluar solo baselines")
+    ap.add_argument("--horizon", type=int, default=180,
+                    help="horizonte del episodio en días simulados (por defecto: 180)")
+    ap.add_argument("--output", default="outputs/evaluation_ttp.png",
+                    help="ruta de la figura de salida")
+    args = ap.parse_args()
+    env = TumorEnv(horizon_days=args.horizon)
     estrategias = {"Sin tratamiento": lambda s: 0.0,
                    "MTD (dosis máx)": lambda s: U_MAX,
                    "Adaptativa (Gatenby)": AdaptiveTherapy()}
-    mappo = load_mappo(env)
+    mappo = load_mappo(env, args.model)
     if mappo is not None:
         estrategias["MAPPO (aprendida)"] = mappo
 
@@ -90,7 +108,9 @@ def main():
         if hasattr(fn, "reset"): fn.reset()
         ttp_l, ttp_r, fR, traj = rollout(env, fn)
         carga = traj[:, 0] + traj[:, 1]
-        fracR = traj[:, 1] / (traj[:, 0] + traj[:, 1] + 1e-9)
+        burden = traj[:, 0] + traj[:, 1]
+        fracR = np.divide(traj[:, 1], burden, out=np.zeros_like(burden),
+                          where=burden > 0)
         c = colores.get(nombre, "#333")
         axL.plot(carga, label=f"{nombre}", lw=2, color=c)
         axR.plot(fracR, label=f"{nombre} (R fin={fR:.2f})", lw=2, color=c)
@@ -100,15 +120,18 @@ def main():
     axL.axhline(env.prog_thr, color="k", ls="--", lw=1, label="Umbral carga")
     axL.set_title("Carga tumoral (S+R)"); axL.set_xlabel("Días"); axL.set_ylabel("Carga")
     axL.legend(fontsize=8); axL.grid(alpha=0.3)
-    axR.axhline(R_MAJORITY, color="k", ls="--", lw=1, label="Mayoría resistente")
+    axR.axhline(env.r_majority, color="k", ls="--", lw=1, label="Mayoría resistente")
     axR.set_title("Fracción resistente R/(S+R) — la métrica clínica")
     axR.set_xlabel("Días"); axR.set_ylabel("Fracción R"); axR.set_ylim(0, 1.05)
     axR.legend(fontsize=8); axR.grid(alpha=0.3)
     fig.suptitle("M5: MTD controla carga pero crea resistencia; MAPPO la contiene")
     fig.tight_layout()
     os.makedirs("outputs", exist_ok=True)
-    fig.savefig("outputs/evaluation_ttp.png", dpi=150, facecolor="white")
-    print("Figura guardada en outputs/evaluation_ttp.png")
+    output_dir = os.path.dirname(args.output)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+    fig.savefig(args.output, dpi=150, facecolor="white")
+    print(f"Figura guardada en {args.output}")
 
 
 if __name__ == "__main__":

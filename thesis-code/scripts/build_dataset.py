@@ -41,11 +41,29 @@ def leer_tabla(path):
 
 
 def cargar_expresion(path):
-    """Expresion DepMap 26Q1: columnas ProfileID, is_default_entry, ModelID, genes."""
+    """Carga un único perfil de expresión predeterminado por modelo.
+
+    DepMap ha usado dos convenciones de nombres/formato para esta bandera:
+    ``is_default_entry`` booleana en releases antiguas y
+    ``IsDefaultEntryForModel`` con valores ``Yes/No`` en 26Q1.  Se aceptan
+    ambas para evitar que perfiles secundarios entren accidentalmente al
+    cruce con GDSC2.
+    """
     expr = pd.read_csv(path)
-    if 'is_default_entry' in expr.columns:          # 1 perfil por linea celular
-        expr = expr[expr['is_default_entry'] == True]
-    expr = expr.drop(columns=[c for c in ('ProfileID', 'is_default_entry')
+    default_col = next((c for c in ('is_default_entry',
+                                    'IsDefaultEntryForModel')
+                        if c in expr.columns), None)
+    if default_col is not None:                     # 1 perfil por línea celular
+        values = expr[default_col]
+        if pd.api.types.is_bool_dtype(values):
+            keep = values.fillna(False)
+        else:
+            keep = values.astype(str).str.strip().str.lower().isin(
+                ('yes', 'true', '1', 'y'))
+        expr = expr.loc[keep].copy()
+    expr = expr.drop(columns=[c for c in ('ProfileID', 'is_default_entry',
+                                          'IsDefaultEntryForModel',
+                                          'IsDefaultEntryForMC')
                               if c in expr.columns])
     if 'ModelID' not in expr.columns:
         primera = expr.columns[0]                    # version vieja: 1ra col sin nombre
@@ -53,6 +71,11 @@ def cargar_expresion(path):
             expr = expr.rename(columns={primera: 'ModelID'})
         else:
             sys.exit(f"ERROR: no hay ModelID en expresion. Cols: {expr.columns.tolist()[:5]}")
+    if expr['ModelID'].isna().any():
+        sys.exit("ERROR: hay perfiles de expresion sin ModelID.")
+    if default_col is not None and expr['ModelID'].duplicated().any():
+        duplicados = int(expr['ModelID'].duplicated().sum())
+        sys.exit(f"ERROR: quedaron {duplicados} perfiles duplicados tras filtrar el perfil predeterminado.")
     return expr
 
 
@@ -88,7 +111,10 @@ def main():
     expr = cargar_expresion(p_expr)
     print(f'      Model.csv:   {len(metadata):,} lineas (catalogo)')
     print(f'      GDSC2:       {len(gdsc2):,} ensayos')
-    print(f'      Expresion:   {len(expr):,} lineas x {expr.shape[1]-1:,} genes')
+    expr_metadata = {'Unnamed: 0', 'ProfileID', 'SequencingID',
+                     'ModelConditionID', 'ModelID'}
+    n_genes = sum(c not in expr_metadata for c in expr.columns)
+    print(f'      Expresion:   {len(expr):,} lineas x {n_genes:,} genes')
 
     col_ic50 = next((c for c in ('LN_IC50', 'ln_IC50', 'IC50') if c in gdsc2.columns), None)
     print(f'      Columna IC50 detectada: {col_ic50}')

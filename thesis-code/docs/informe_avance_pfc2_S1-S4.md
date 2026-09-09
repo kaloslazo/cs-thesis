@@ -1,5 +1,14 @@
 # Informe de avance — PFC II (Semanas 1–4)
 
+> **Estado documental (2026-09-08):** este informe conserva las cifras de la
+> corrida histórica de las semanas 1--4. Sus valores de $n=15$, EXP-2 y tasas de
+> éxito no corresponden automáticamente a la calibración vigente DepMap 26Q1 +
+> GDSC2 release 8.5. Para las cifras actualmente verificadas, consultar
+> `outputs/calibracion_real_2026-09-08.md`,
+> `outputs/validacion_calibrada_15semillas_2026-09-08.md` y
+> `outputs/exp1_robustez_v2.md` y
+> `outputs/estado_corridas_2026-09-08.md`.
+
 **Tesis:** Mitigación de la resistencia evolutiva en glioblastoma multiforme mediante
 aprendizaje por refuerzo multiagente adversarial (marco **GBMARL**, MAPPO-CTDE).
 **Autores:** Kalos B. Lazo Mera · Gianpier A. Segovia Ureta

@@ -1,13 +1,9 @@
 \customchapter{RESUMEN}
 
-Lorem ipsum dolor sit amet, cum tollit aeterno ut. Sea amet iuvaret placerat in, saperet impedit consulatu mei ne, quo no alii vituperatoribus. No mutat dolorum habemus pro, vis rebum accusam no, meis partiendo necessitatibus cu sit. Zril mediocrem scriptorem cu quo, ex duo mucius doming legendos. Posse nemore cu cum. Et facer pertinax sed, atqui ignota antiopam in pro, dolore oportere ius ex.
+El glioblastoma multiforme presenta una resistencia evolutiva que limita la duración del control logrado con temozolomida. Esta tesis propone GBMARL, un marco de aprendizaje por refuerzo multiagente adversarial que modela la terapia y la evolución tumoral como dos agentes que interactúan sobre un simulador de poblaciones sensibles y resistentes. La política de terapia se entrena con MAPPO bajo entrenamiento centralizado y ejecución descentralizada (CTDE), y se compara con IPPO, ausencia de tratamiento, dosis máxima tolerada y la heurística adaptativa de Gatenby.
 
-An justo nonumy mnesarchum quo, eruditi cotidieque in sed. Consulatu urbanitas conceptam eam id, liber accusamus eu mel. Ius iusto albucius elaboraret id, dico partiendo contentiones nec in, sint eruditi per ne. No eruditi probatus cum, no mei sumo facer torquatos. Sea dicunt facilisis corrumpit at, audiam accusam eligendi qui ne.
+El simulador se calibró integrando DepMap Public 26Q1 y GDSC2 release 8.5. El cruce recuperó 34 líneas de GBM con ensayos de sensibilidad y 24 con expresión completa. Para la temozolomida se obtuvo una brecha de sensibilidad aproximada de 9,1 veces entre las poblaciones sensible y resistente. La evaluación usa el tiempo a falla combinado, que termina cuando se supera el umbral de carga o cuando la fracción resistente alcanza la mayoría, registrando el modo de falla.
 
-Facete officiis invenire sit ex, facete causae fabellas ei qui. Et pertinacia contentiones definitiones nam. Cum moderatius signiferumque in, blandit senserit cum no. Mea appareat posidonium contentiones an, no case accommodare cum, ei sea oporteat percipitur. 
-Ea congue necessitatibus sed, no adhuc graeco usu. Eam harum equidem fierent ne, duo id facer consequuntur signiferumque. 
-Dolore molestie phaedrum nec ei, ei eos noluisse constituto. Eruditi propriae in mea, vero laboramus cotidieque ad duo. Tacimates constituto est ex, ad mei clita sapientem evertitur. \\
+En la comparación nominal calibrada, quince políticas MAPPO alcanzaron una mediana de 34 días [27, 41] y superaron a Gatenby en 13/15 semillas; quince políticas IPPO alcanzaron una mediana de 31 días [23, 34] y superaron a Gatenby en 12/15. La diferencia pareada MAPPO--IPPO fue exploratoria ($p=0{,}013759$). El análisis de sensibilidad identificó una fragilidad importante frente a la reducción de $K$: con $K=0{,}8K_0$, la mediana de MAPPO cayó a 25 días. Por ello, los resultados constituyen evidencia \emph{in silico} de comportamiento adaptativo bajo el modelo especificado, no evidencia de eficacia clínica.
 
-
-\noindent \textbf{Palabras clave:}\\
-\noindent Palabra clave 1; Palabra clave 2; Palabra clave 3; Palabra clave 4
+\noindent \textbf{Palabras clave:} glioblastoma; terapia adaptativa; resistencia evolutiva; aprendizaje por refuerzo multiagente; MAPPO-CTDE; temozolomida.

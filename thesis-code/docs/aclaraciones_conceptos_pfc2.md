@@ -1,5 +1,12 @@
 # Aclaraciones de conceptos — EXP-1 y EXP-2 (PFC II)
 
+> **Nota de vigencia (2026-09-08):** los ejemplos numéricos y las tablas de
+> EXP-2 de este documento pertenecen a corridas históricas. No deben citarse
+> como resultados de la calibración vigente. Los resultados recalculados se
+> encuentran en `outputs/calibracion_real_2026-09-08.md`,
+> `outputs/validacion_calibrada_15semillas_2026-09-08.md` y
+> `outputs/exp1_robustez_v2.md`; EXP-2 sigue parcial (4/90 celdas).
+
 Documento de apoyo para entender los términos del informe de avance. Escrito con
 ejemplos concretos. Cubre: (1) qué es `K`, (2) ruido de observación vs. perturbación de
 parámetros, (3) qué significan `ic50`, `×0.9`, `×1.2`, etc., y (4) la **interpretación**

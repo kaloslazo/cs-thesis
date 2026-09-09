@@ -7,9 +7,29 @@ NO confundir con la métrica vieja (solo-resistencia), que reportaba el horizont
 cuando la falla era por carga, inflando falsamente los resultados.
 """
 import numpy as np
+from dataclasses import dataclass
+
+from .outcomes import (SPANISH_LABELS, classify_outcome, is_censored,
+                       is_success, scalar_ttp)
 
 FIXED_PHI = 0.01
 U_MAX = 1.0
+
+
+@dataclass(frozen=True)
+class EvaluationResult:
+    """Resultado estructurado de un episodio de evaluación."""
+
+    ttp: int
+    terminal_day: int
+    mode: str
+    censored: bool
+    successful: bool
+    burden: float
+    frac_resistant: float
+    mean_dose: float
+    t_load: int | None = None
+    t_resistance: int | None = None
 
 
 class Gatenby:
@@ -29,34 +49,14 @@ class Gatenby:
         return U_MAX if self.d else 0.0
 
 
-def ttp_combinado(env, therapy_fn, tumor_fn=lambda s: FIXED_PHI):
-    """Días hasta que el episodio termina (carga progresó O resistencia mayoría
-    O sobrevivió el horizonte). Es el tiempo de manejo clínico exitoso."""
+def evaluate_episode(env, therapy_fn, tumor_fn=lambda s: FIXED_PHI) -> EvaluationResult:
+    """Evalúa un episodio y conserva evento, censura y tiempos componentes."""
     if hasattr(therapy_fn, "reset"):
         therapy_fn.reset()
     obs, _ = env.reset(seed=0)
     state = obs["therapy"]
     info = {}
-    while True:
-        u = float(therapy_fn(state))
-        phi = float(tumor_fn(state))
-        obs, rew, terms, truncs, infos = env.step(
-            {"therapy": np.array([u], np.float32),
-             "tumor": np.array([phi], np.float32)})
-        state = obs["therapy"]
-        info = infos["therapy"]
-        if terms.get("therapy", False) or truncs.get("therapy", False):
-            return info["day"]
-
-
-def ttp_combinado_detalle(env, therapy_fn, tumor_fn=lambda s: FIXED_PHI):
-    """Como ttp_combinado pero devuelve (días, motivo, carga, fracR, dosis_media)."""
-    if hasattr(therapy_fn, "reset"):
-        therapy_fn.reset()
-    obs, _ = env.reset(seed=0)
-    state = obs["therapy"]
     doses = []
-    info = {}
     term = trunc = False
     while True:
         u = float(therapy_fn(state))
@@ -71,12 +71,38 @@ def ttp_combinado_detalle(env, therapy_fn, tumor_fn=lambda s: FIXED_PHI):
         trunc = truncs.get("therapy", False)
         if term or trunc:
             break
-    if trunc and not term:
-        motivo = "SOBREVIVIÓ horizonte (ÉXITO)"
-    elif info.get("untreatable"):
-        motivo = "FALLO: resistencia mayoría"
-    elif info.get("progressed"):
-        motivo = "FALLO: carga progresó"
-    else:
-        motivo = "extinto"
-    return info["day"], motivo, info["burden"], info["fracR"], float(np.mean(doses))
+
+    mode = info.get("failure_mode")
+    if mode is None:  # Compatibilidad con entornos/artefactos anteriores.
+        mode = classify_outcome(
+            progressed=bool(info.get("progressed")),
+            untreatable=bool(info.get("untreatable")),
+            extinct=bool(term and not info.get("progressed") and
+                         not info.get("untreatable")),
+            reached_horizon=bool(trunc and not term),
+        )
+    terminal_day = int(info["day"])
+    return EvaluationResult(
+        ttp=scalar_ttp(mode, terminal_day, env.horizon),
+        terminal_day=terminal_day,
+        mode=mode,
+        censored=is_censored(mode),
+        successful=is_success(mode),
+        burden=float(info["burden"]),
+        frac_resistant=float(info["fracR"]),
+        mean_dose=float(np.mean(doses)),
+        t_load=info.get("t_load"),
+        t_resistance=info.get("t_resistance"),
+    )
+
+
+def ttp_combinado(env, therapy_fn, tumor_fn=lambda s: FIXED_PHI):
+    """TTP escalar compatible: primer fracaso; éxito/extinción = horizonte."""
+    return evaluate_episode(env, therapy_fn, tumor_fn).ttp
+
+
+def ttp_combinado_detalle(env, therapy_fn, tumor_fn=lambda s: FIXED_PHI):
+    """Como ttp_combinado pero devuelve (días, motivo, carga, fracR, dosis_media)."""
+    result = evaluate_episode(env, therapy_fn, tumor_fn)
+    return (result.ttp, SPANISH_LABELS[result.mode], result.burden,
+            result.frac_resistant, result.mean_dose)

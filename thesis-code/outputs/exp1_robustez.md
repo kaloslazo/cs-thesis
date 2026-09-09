@@ -1,5 +1,9 @@
 # EXP-1 Robustez — resultados
 
+> **Histórico:** esta salida no corresponde a la auditoría calibrada del
+> 2026-09-08. Usa una corrida anterior y no debe mezclarse con
+> `exp1_robustez_calibrada_5semillas_2026-09-08.md`.
+
 Semillas n=15 · pasos=120000 · métrica TTP-combinado
 
 Nominal MAPPO: mediana=35 d, tasa éxito vs Gatenby(27)=93%

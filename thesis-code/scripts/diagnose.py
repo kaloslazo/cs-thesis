@@ -17,6 +17,8 @@ import numpy as np
 import torch
 from gbmarl.tumor_env import TumorEnv
 from gbmarl.mappo import train_mappo, Agent, obs_therapy, obs_tumor
+from gbmarl.evalutils import evaluate_episode
+from gbmarl.outcomes import SPANISH_LABELS
 
 FIXED_PHI = 0.01
 U_MAX = 1.0
@@ -34,25 +36,9 @@ class Gatenby:
 
 def rollout_diag(env, therapy_fn, tumor_fn=lambda s: FIXED_PHI):
     """Devuelve (días, motivo, carga_final, fracR_final, dosis_media)."""
-    obs, _ = env.reset(seed=0); state = obs["therapy"]
-    doses = []; info = {}; term = trunc = False
-    while True:
-        u = float(therapy_fn(state)); phi = float(tumor_fn(state))
-        obs, rew, terms, truncs, infos = env.step({"therapy": np.array([u], np.float32),
-                                                   "tumor": np.array([phi], np.float32)})
-        doses.append(u); state = obs["therapy"]; info = infos["therapy"]
-        term = terms.get("therapy", False); trunc = truncs.get("therapy", False)
-        if term or trunc:
-            break
-    if trunc and not term:
-        motivo = "SOBREVIVIÓ horizonte (ÉXITO)"
-    elif info.get("untreatable"):
-        motivo = "FALLO: resistencia mayoría"
-    elif info.get("progressed"):
-        motivo = "FALLO: carga progresó"
-    else:
-        motivo = "extinto"
-    return info["day"], motivo, info["burden"], info["fracR"], float(np.mean(doses))
+    result = evaluate_episode(env, therapy_fn, tumor_fn)
+    return (result.terminal_day, SPANISH_LABELS[result.mode], result.burden,
+            result.frac_resistant, result.mean_dose)
 
 
 def policy_from(agent):

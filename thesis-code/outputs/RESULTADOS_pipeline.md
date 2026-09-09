@@ -1,5 +1,10 @@
 # GBMARL — Resultados del pipeline (CORRIDA COMPLETA 120k)
 
+> **Histórico:** este reporte conserva una corrida anterior y no debe usarse
+> para representar la auditoría calibrada del 2026-09-08. Consulte
+> `outputs/estado_corridas_2026-09-08.md` para identificar los artefactos
+> vigentes.
+
 Fecha: 2026-06-12 · Corrida reproducible end-to-end con arnés reanudable + checkpointing intra-corrida (`scripts/train_ckpt.py`).
 
 ## Resumen en una línea

@@ -1,5 +1,12 @@
 # Protocolo experimental — PFC II (GBMARL)
 
+> **Addendum V2 (posterior a las corridas originales):** el protocolo original se
+> conserva abajo para trazabilidad. Las correcciones surgidas de su auditoría —Monte
+> Carlo conjunto, controles de `K`, sensibilidad del endpoint, baselines contra el
+> mismo adversario y estadística pareada— están implementadas en los scripts V2 y se
+> documentan en `docs/correcciones_metodologicas_v2.md`. No se reinterpretan los
+> resultados históricos como V2 sin volver a ejecutar los experimentos.
+
 **Tesis:** Mitigación de la resistencia evolutiva en glioblastoma multiforme mediante
 aprendizaje por refuerzo multiagente adversarial (MAPPO-CTDE).
 **Autores:** Kalos B. Lazo Mera · Gianpier A. Segovia Ureta · **Asesor:** V. E. Martínez Abaunza.
@@ -115,8 +122,9 @@ El póster de PFC I ya señala al adversario débil como limitación; este exper
 
 ### Diseño estadístico EXP-2
 - **Semillas:** `n=15` por (variante × phi_max).
-- **Contraste CTDE vs. IPPO:** Mann-Whitney U (unilateral, MAPPO > IPPO) + tasa de éxito; se
-  reporta *p* honesto y tamaño de efecto (diferencia de medianas). Se documenta la
+- **Contraste CTDE vs. IPPO:** Wilcoxon pareado unilateral (MAPPO > IPPO), porque cada
+  semilla forma un par bajo el mismo régimen, con corrección de Holm entre los tres
+  valores de `phi_max`; se reporta *p* honesto y diferencia de medianas. Se documenta la
   **bimodalidad** por cuenca.
 - **Hipótesis pre-registrada:** con observabilidad parcial más severa (adversario fuerte), la
   brecha MAPPO−IPPO **crece** respecto al régimen nominal (donde era estrecha/borderline). Si

@@ -1,13 +1,34 @@
-\customchapter{CONCLUSIONES} 
+\customchapter{CONCLUSIONES}
+\label{cap:conclusiones}
 
-Lorem ipsum dolor sit amet, dicant volutpat vulputate sea at. Et nam volumus voluptua, ea noster omnesque has. Qui ut graeci melius platonem. Sit fugit prompta dignissim cu. Soluta meliore repudiare vis in, eum id liber maiestatis contentiones.
+Esta tesis diseñó y evaluó GBMARL, un marco de aprendizaje por refuerzo multiagente adversarial para estudiar la dosificación adaptativa de temozolomida frente a la resistencia evolutiva del glioblastoma. La conclusión principal es que el marco puede descubrir políticas que retrasan el tiempo a falla en el escenario nominal del simulador, pero la magnitud de esa ventaja depende de los supuestos biológicos, del endpoint y de la semilla de entrenamiento.
 
-Ea sit suas melius verear. Fugit facilisis at vel, apeirian appellantur ex nec. Vis id quis elit qualisque. Ludus sadipscing eu eum.
+\section*{Conclusiones principales}
+\phantomsection
+\addcontentsline{toc}{subsection}{Conclusiones principales}
 
-Ea inani insolens dissentiunt eos, wisi efficiendi ex vim, modus justo inani et pro. Eam at modus definiebas, id eos philosophia disputationi, eu qui facete habemus. In dico unum neglegentur mea, ne phaedrum disputationi his. Tibique deseruisse mel ne, latine aperiri phaedrum duo ex. Erant corrumpit ut duo, in erant possim reprehendunt nec. Aeque nonumes minimum te eam, possim constituto qui ei, in has suas quidam molestie.
+\begin{enumerate}
+  \item \textbf{La calibración quedó trazable, pero no es una calibración clínica completa.} La integración de DepMap Public 26Q1 con GDSC2 release 8.5 recuperó 34 líneas GBM con ensayos de sensibilidad y 24 con expresión completa. La brecha estimada de sensibilidad a TMZ fue de aproximadamente 9,1 veces entre las poblaciones sensible y resistente. Esta evidencia informa la potencia relativa del fármaco; las tasas de crecimiento, la capacidad de carga y otros parámetros continúan siendo supuestos de literatura o de normalización y están identificados como tales.
 
-Vel no intellegat voluptaria, ei sed causae scaevola comprehensam. No erant cetero dissentiet per, mei an nulla scaevola. Euismod delicata vis eu, in odio docendi persecuti sea. Eos fabellas accusata at. His eu reque altera sadipscing, id ius regione lobortis expetenda, minim timeam dignissim vix eu.
+  \item \textbf{El TTP-combinado distingue dos mecanismos de fracaso que antes podían confundirse.} La ausencia de tratamiento falló por carga en el día 12, mientras que MTD y Gatenby fallaron por mayoría resistente en los días 13 y 27. La política MAPPO de la evaluación representativa llegó al día 41 y falló por resistencia. Así, una carga final baja no se interpreta automáticamente como éxito: también se verifica si el tumor ya es predominantemente resistente.
 
-Unum duis definitiones vel in. Nulla dicit mei ea, odio nulla an pri. Cu docendi torquatos usu. Possit maiorum rationibus ea duo, eu vitae primis postulant sed, mel erat officiis principes an. Pro saepe regione volumus id, debet reformidans ex his. Sale altera moderatius duo ea, an fastidii volutpat per, et mel maiorum corpora.
+  \item \textbf{MAPPO mostró una ventaja nominal sobre las líneas base en la corrida calibrada.} En quince semillas, MAPPO obtuvo mediana 34 [27, 41] días y superó a Gatenby en 13/15 semillas. IPPO obtuvo mediana 31 [23, 34] días y superó a Gatenby en 12/15. La diferencia MAPPO--IPPO fue compatible con una ventaja del crítico centralizado en esta muestra ($p=0{,}013759$), pero sigue siendo evidencia \emph{in silico} condicionada al simulador y no eficacia clínica.
 
-Modo malis et eam. Veniam equidem mei ad, mucius facilisi et pro. Postea eripuit neglegentur vis no. Id vis quis eleifend appellantur, sit integre singulis ei.
+  \item \textbf{La sensibilidad delimita la afirmación.} El análisis OAT de ocho parámetros mostró que la ventaja no es universal. La reducción de la capacidad de carga fue especialmente crítica: con $K=0{,}8K_0$, la mediana de MAPPO cayó a 25 días frente a 34 días nominales. En una perturbación conjunta de factores entre 0,8 y 1,2, la mediana de las medianas fue 30 días, pero existieron entornos donde la tasa de éxito frente a Gatenby fue 0\,\%. El hallazgo es, por tanto, una propiedad del régimen modelado y no una garantía ante cualquier paciente o tumor.
+
+  \item \textbf{El pipeline es reproducible y auditable.} Se corrigió el filtrado de perfiles de expresión de DepMap, se documentaron hashes y procedencia, se verificó la equivalencia numérica entre el entorno rápido y el de referencia, y la suite de regresión terminó con 26 pruebas aprobadas. El entrenamiento se ejecutó con quince semillas por variante y 120\,832 pasos efectivos, conservando checkpoints reanudables.
+\end{enumerate}
+
+\section*{Respuesta a la pregunta de investigación}
+\phantomsection
+\addcontentsline{toc}{subsection}{Respuesta a la pregunta de investigación}
+
+Bajo la calibración, el endpoint y el adversario fijo especificados, GBMARL sí permitió descubrir una política MAPPO con mayor TTP nominal que MTD y Gatenby, y la comparación MAPPO--IPPO sugiere que el crítico centralizado puede mejorar el resultado en este entorno. Sin embargo, la evidencia disponible no autoriza afirmar superioridad universal, robustez frente a un adversario óptimo ni eficacia clínica. La respuesta correcta es condicional: el método es prometedor como marco computacional y su valor depende de que los parámetros, la fuerza adversarial y los criterios de progresión estén bien justificados.
+
+\section*{Limitaciones finales}
+\phantomsection
+\addcontentsline{toc}{subsection}{Limitaciones finales}
+
+El modelo no incluye espacio, heterogeneidad clonal detallada, farmacocinética clínica, radioterapia, combinaciones terapéuticas ni una cohorte de pacientes. La variable de salud del paciente tampoco debe interpretarse todavía como resultado clínico: sin datos de toxicidad longitudinal y una función de utilidad validada, solo puede permanecer como extensión experimental parametrizada. Además, EXP-2 permanece parcial: se han auditado 4 de 90 celdas, todas MAPPO con $\phi_{\max}=0{,}05$; los niveles $0{,}10$ y $0{,}20$ y las celdas IPPO no deben presentarse como resultados actuales.
+
+En conjunto, la tesis entrega un marco ejecutable, una métrica que separa carga y resistencia, una calibración farmacológica trazable y evidencia experimental reproducible con límites explícitos. Su contribución central no es afirmar que una política computacional ya sea un tratamiento, sino mostrar cómo evaluar de manera más honesta políticas adaptativas en presencia de resistencia evolutiva.

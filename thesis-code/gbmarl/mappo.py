@@ -7,7 +7,7 @@ Diferencia clave vs IPPO:
     centralizado). Eso maneja la no-estacionariedad del aprendizaje simultáneo.
 
 Observación parcial (decisión de diseño = realismo clínico):
-  · terapia: [carga total S+R, droga c]   (el médico mide tamaño, no S/R)
+  · terapia: [carga total S+R, droga c] y, si existe, toxicidad A
   · tumor:   [S, R]                         (conoce su composición)
   · crítico: [S, R, c]                      (estado conjunto, solo en training)
 """
@@ -24,9 +24,12 @@ def mlp(in_dim, out_dim, hidden=64):
                          nn.Linear(hidden, out_dim))
 
 
-# --- Extractores de observación a partir del estado global [S, R, c] ---
-def obs_therapy(state):                       # [carga total, droga]
-    return np.array([state[0] + state[1], state[2]], dtype=np.float32)
+# --- Extractores a partir de [S,R,c] o de la extensión [S,R,c,A] ---
+def obs_therapy(state):
+    values = [state[0] + state[1], state[2]]
+    if len(state) >= 4:
+        values.append(state[3])
+    return np.asarray(values, dtype=np.float32)
 
 def obs_tumor(state):                         # [S, R]
     return np.array([state[0], state[1]], dtype=np.float32)
@@ -102,15 +105,21 @@ def train_mappo(env, total_timesteps=120000, n_steps=2048, lr=3e-4, gamma=0.99,
     except Exception:
         pass
 
-    # CTDE: critico ve estado global (3) si MAPPO; solo obs local (2) si IPPO
-    critic_dim = 3 if centralized else 2
-    th = Agent(2, critic_dim, 1, env.action_space("therapy").low, env.action_space("therapy").high)
-    tu = Agent(2, critic_dim, 1, env.action_space("tumor").low, env.action_space("tumor").high)
+    obs, _ = env.reset(seed=seed)
+    state = obs["therapy"]
+    th_local_dim = len(obs_therapy(state))
+    tu_local_dim = len(obs_tumor(state))
+    global_dim = len(global_state(state))
+    th_critic_dim = global_dim if centralized else th_local_dim
+    tu_critic_dim = global_dim if centralized else tu_local_dim
+    th = Agent(th_local_dim, th_critic_dim, 1,
+               env.action_space("therapy").low, env.action_space("therapy").high)
+    tu = Agent(tu_local_dim, tu_critic_dim, 1,
+               env.action_space("tumor").low, env.action_space("tumor").high)
     opt_th = torch.optim.Adam(th.parameters(), lr=lr)
     opt_tu = torch.optim.Adam(tu.parameters(), lr=lr)
 
-    obs, _ = env.reset(seed=seed)
-    state = obs["therapy"]                      # estado global [S,R,c]
+    # ``state`` ya fue inicializado arriba para inferir dimensiones sin hardcode.
     ret_th = ret_tu = 0.0
     rets_th, rets_tu = [], []
     hist = []

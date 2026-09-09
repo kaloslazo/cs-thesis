@@ -14,8 +14,7 @@ data/
     │   └── OmicsExpressionTPMLogp1HumanProteinCodingGenes.csv
     │
     └── cellmodelpassports/
-        ├── GDSC2_fitted_dose_response_27Oct23.csv
-        └── screened_compounds_rel_8.5.csv
+        └── GDSC2_fitted_dose_response_27Oct23.xlsx
 ```
 
 ---
@@ -77,7 +76,7 @@ representar biológicamente cada línea celular como un vector numérico
 
 ## 2. Cell Model Passports / GDSC
 
-### `GDSC2_fitted_dose_response_27Oct23.csv`
+### `GDSC2_fitted_dose_response_27Oct23.xlsx`
 
 **Qué es:**
 Tabla de sensibilidad a fármacos.
@@ -120,10 +119,12 @@ saber qué tan bien funciona una droga contra una línea celular
 
 ---
 
-### `screened_compounds_rel_8.5.csv`
+### Diccionario de compuestos
 
 **Qué es:**
-Diccionario de fármacos.
+Diccionario opcional de fármacos de GDSC. No forma parte de la descarga
+calibrada vigente: la calibración de TMZ usa directamente `DRUG_NAME` del
+archivo de respuesta.
 
 **Qué representa una fila:**
 Un fármaco.

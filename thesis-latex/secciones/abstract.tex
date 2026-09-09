@@ -1,17 +1,13 @@
-\customchapter{ABSTRACT} 
+\customchapter{ABSTRACT}
 
 \begin{center}
-\large \vspace{-1.5cm} \textbf{TÍTULO DE LA TESIS EN INGLÉS}
+\large \vspace{-1.5cm} \textbf{Mitigating evolutionary resistance in glioblastoma using adversarial multi-agent reinforcement learning}
 \end{center}
 
-Lorem ipsum dolor sit amet, with the eternal God, that takes away the. Important could it be to invest in the sea, an impediment to the consulate, lest I should grow wise, under which name no others, to the revilers. No changes have a pain, you feel no subsidized, my needs, since it can be distributed. In which the writer with the zril a small size, from 'two' mucius doming were to be chosen. A man can do with him. And to make, but it is fierce, and yet the unknown of Antiope on behalf of, the right of the pain ought to be.
+Glioblastoma multiforme develops evolutionary resistance that limits the duration of tumor control achieved with temozolomide. This thesis proposes GBMARL, an adversarial multi-agent reinforcement learning framework that models therapy and tumor evolution as two agents interacting over a simulator of sensitive and resistant tumor populations. The therapy policy is trained with MAPPO under centralized training and decentralized execution (CTDE), and is compared with IPPO, no treatment, maximum tolerated dose, and the adaptive Gatenby heuristic.
 
-Is this just mnesarchum running smoothly, but instructed the daily. Consulate refinement to this concept, a book accusing football honey. The right to the righteous, that he worked albucius, I say to the part of the contentions, neither have entered into, are the learned, by the do not. No approved as instructed, no curling but do take me. Antioxidants dough at sea say, I feel they should be chosen.
+The simulator was calibrated by integrating DepMap Public 26Q1 and GDSC2 release 8.5. The data join recovered 34 GBM cell lines with sensitivity assays and 24 lines with complete expression data. For temozolomide, the estimated sensitivity gap between the sensitive and resistant populations was approximately 9.1-fold. Evaluation uses a combined time-to-progression endpoint: an episode ends when tumor burden crosses its control threshold or when the resistant fraction becomes a majority, while recording the failure mode.
 
-Elegantly offices to find out, salty stories to the cause. For definitions and resolution of conflicts. When measured signiferumque to sit when he feels no. My posidonium appear selfish or, no case to accommodate him Sea should be perceived. Planning needs but that no further Greek practice. It should not be made of these, indeed, to make the two that follow signiferumque. \\
+In the nominal calibrated comparison, fifteen MAPPO policies achieved a median of 34 days [27, 41] and exceeded Gatenby in 13/15 seeds; fifteen IPPO policies achieved a median of 31 days [23, 34] and exceeded Gatenby in 12/15 seeds. The paired MAPPO--IPPO difference was exploratory ($p=0.013759$). Sensitivity analysis identified a major fragility to reductions in carrying capacity $K$: at $K=0.8K_0$, the MAPPO median fell to 25 days. The results therefore provide in-silico evidence of adaptive behavior under the specified model, not evidence of clinical efficacy.
 
-
-\noindent \textbf{Keywords:}\\
-\noindent Keyword 1; Keyword 2; Keyword 3; Keyword 4
-
-
+\noindent \textbf{Keywords:} glioblastoma; adaptive therapy; evolutionary resistance; multi-agent reinforcement learning; MAPPO-CTDE; temozolomide.
