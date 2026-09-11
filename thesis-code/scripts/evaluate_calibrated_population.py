@@ -91,12 +91,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--seeds", type=int, default=15)
     parser.add_argument("--model-dir", default="outputs/models")
+    parser.add_argument("--calibration", default="data/processed/calibration.json")
     parser.add_argument("--output", default="outputs/validacion_calibrada_15semillas_2026-09-08")
     args = parser.parse_args()
     if args.seeds < 2:
         parser.error("--seeds debe ser >= 2")
 
-    env = TumorEnv(horizon_days=180)
+    params = load_calibration(args.calibration, required=True)
+    env = TumorEnv(params=params, horizon_days=180)
     gatenby = evaluate_episode(env, Gatenby())
     mappo = evaluate_variant(env, "mappo", args.seeds, args.model_dir)
     ippo = evaluate_variant(env, "ippo", args.seeds, args.model_dir)
@@ -105,7 +107,7 @@ def main():
     w = stats.wilcoxon(m, i, alternative="greater")
 
     payload = {
-        "calibration": params_fingerprint(load_calibration()),
+        "calibration": params_fingerprint(params),
         "horizon_days": env.horizon,
         "phi_fixed": 0.01,
         "steps_effective": 120832,
@@ -126,7 +128,7 @@ def main():
         return f"{v['median']:.0f} [{v['min']},{v['max']}]"
 
     lines = [
-        "# Validación calibrada nominal — 15 semillas\n",
+        f"# Validación calibrada nominal — {args.seeds} semillas\n",
         f"Calibración `{payload['calibration']}` · horizonte {env.horizon} d · "
         f"φ fijo={payload['phi_fixed']} · pasos efectivos={payload['steps_effective']}\n",
         "TTP-combinado: primer fallo de carga o de tratabilidad; el modo de falla se conserva por separado.\n",

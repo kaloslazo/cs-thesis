@@ -2,6 +2,29 @@
 
 Referencia rápida para entender qué es cada archivo en `data/raw/`.
 
+## Alcance de la versión actual
+
+DepMap identifica y filtra líneas y aporta expresión al dataset integrado. El
+calibrador actual solo lee `DRUG_NAME`, `ModelID`, `LN_IC50` y `AUC`: no usa genes
+para personalizar parámetros. Los percentiles entre líneas representan S/R por
+supuesto de modelado. Las constantes de crecimiento, eliminación y techo de muerte
+requieren respaldo cuantitativo adicional; no fueron ajustadas longitudinalmente.
+
+La referencia versionada `configs/calibration_reference_20260908.json` conserva los
+cuatro valores farmacológicos de la corrida actual y reproduce la huella
+`1fd8464abb97` con los restantes valores de `Params`. Desde `thesis-code/`:
+
+```bash
+../.venv/bin/python scripts/evaluate_calibrated_population.py --seeds 15 --calibration configs/calibration_reference_20260908.json --output outputs/validacion_referencia
+```
+
+Este comando requiere los checkpoints locales descritos en el reporte nominal.
+La referencia permite reconstruir los parámetros; no sustituye los datos crudos ni
+demuestra la procedencia de los checkpoints. El evaluador nominal se detiene si no
+existe la calibración seleccionada. Otros scripts aún admiten placeholders y deben
+auditarse antes de nuevas corridas oficiales. Las secciones siguientes describen
+también integraciones opcionales; no implican uso de genes o SMILES por la política.
+
 ---
 
 ## Estructura

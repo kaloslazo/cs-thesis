@@ -76,16 +76,22 @@ class ToxicityParams:
             raise ValueError("al menos un peso de salud debe ser positivo")
 
 
-def load_calibration(path: str = "data/processed/calibration.json") -> Params:
+def load_calibration(path: str = "data/processed/calibration.json", *, required: bool = False) -> Params:
     """
     Devuelve Params con los 4 campos de fármaco REEMPLAZADOS por los valores
     derivados del dataset (calibration.json). El resto (alpha, K, lambda_c) se
-    mantiene como literatura. Si no existe el json, devuelve los placeholders.
+    mantiene como supuestos del modelo. Con required=True, un archivo ausente
+    detiene la evaluación; el modo exploratorio conserva el fallback anterior.
     """
     import json
     import os
     p = Params()
     if not os.path.exists(path):
+        if required:
+            raise FileNotFoundError(
+                f"Calibración requerida: {path}. Ejecuta scripts/calibrate.py o "
+                "selecciona explícitamente una calibración de referencia."
+            )
         print(f"[config] AVISO: {path} no existe; uso placeholders de literatura.")
         return p
     with open(path) as f:

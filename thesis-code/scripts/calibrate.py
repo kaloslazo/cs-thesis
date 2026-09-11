@@ -84,9 +84,9 @@ def main():
                        "hay_palanca": bool(palanca_ok)},
         "provenance": {
             "ic50_S/ic50_R": "DATOS: GDSC2 TMZ LN_IC50, percentiles p10/p90 vs mediana",
-            "delta_max_S": f"LITERATURA: {KILL_TO_GROWTH_RATIO} x alpha_S",
+            "delta_max_S": f"SUPUESTO: {KILL_TO_GROWTH_RATIO} x alpha_S; fuente cuantitativa pendiente de verificar",
             "delta_max_R": f"delta_max_S x eficacia_R (datos, piso {MIN_EFFICACY_R})",
-            "alpha/K/lambda_c": "LITERATURA (config.py)"},
+            "alpha/K/lambda_c": "SUPUESTOS/NORMALIZACIÓN (config.py); no ajustados a esta cohorte"},
     }
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(calib, open(OUT, "w"), indent=2, ensure_ascii=False)

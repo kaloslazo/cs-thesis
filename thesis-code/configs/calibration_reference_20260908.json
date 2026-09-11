@@ -1,0 +1,26 @@
+{
+  "drug": "Temozolomide",
+  "n_lines": 24,
+  "raw_stats": {
+    "ln_ic50_median": 6.5633,
+    "ln_ic50_p10": 5.5418,
+    "ln_ic50_p90": 7.7495,
+    "eff_sensible": 0.0475,
+    "eff_resistente": 0.0155
+  },
+  "derived_params": {
+    "ic50_S": 0.36,
+    "ic50_R": 3.2744,
+    "delta_max_S": 0.3,
+    "delta_max_R": 0.15
+  },
+  "provenance": {
+    "source": "Instantánea de data/processed/calibration.json de la corrida 2026-09-08; DepMap Public 26Q1 y GDSC2 release 8.5",
+    "expected_params_fingerprint": "1fd8464abb97",
+    "ic50_S/ic50_R": "exp(p10/p90 LN_IC50 - mediana); contraste entre líneas usado como aproximación de poblaciones S/R",
+    "delta_max_S": "SUPUESTO: 2.0 x alpha_S; fuente cuantitativa específica pendiente de verificar",
+    "delta_max_R": "delta_max_S x razón de eficacia derivada de AUC, con piso de diseño 0.5",
+    "remaining_params": "Params() en gbmarl/config.py; no son estimaciones clínicas de esta cohorte",
+    "scope": "Referencia numérica para reproducir el simulador; no incluye datasets crudos ni checkpoints y no verifica la procedencia de un checkpoint"
+  }
+}

@@ -1,5 +1,16 @@
 # Estado de corridas de tesis — 2026-09-08
 
+## Revisión económica del 2026-09-10
+
+Se sincronizaron conclusiones, recomendaciones, resumen y abstract con las corridas
+completas. El marco metodológico ahora explicita la aproximación S/R por percentiles,
+el uso real de DepMap y los parámetros asumidos. No se reentrenó ni recalibró.
+La suite actual pasa 29 pruebas, incluidas tres del cargador de calibración.
+El PDF actualizado tiene 76 páginas y las páginas modificadas se revisaron visualmente;
+persisten avisos de maquetación anteriores en otras secciones. La evaluación nominal
+requiere calibración y acepta una referencia versionada. La validación de metadatos
+de checkpoints y el resto de mejoras están en `docs/plan_mejoras_pendientes.md`.
+
 ## Corridas verificadas con la calibración real
 
 - Integración DepMap 26Q1 + GDSC2 y calibración TMZ: [calibracion_real_2026-09-08.md](calibracion_real_2026-09-08.md).
@@ -11,11 +22,11 @@
 - Integración/calibración reproducida nuevamente desde los archivos crudos: 67 líneas GBM, 34 con ensayos, 24 con expresión completa, 5,879 registros, `ic50_S=0.360`, `ic50_R=3.274`, brecha `9.1x` y `neto_S=-0.150`.
 - Evaluación nominal reproducida: sin tratamiento 12 días, MTD 13, Gatenby 27 y MAPPO 41; los motivos de falla se mantienen auditados.
 - Control de horizonte extendido ejecutado a 360 días: los cuatro episodios representativos fallan antes del horizonte (12, 13, 27 y 41 días), sin censura administrativa.
-- Tesis LaTeX compilada en `thesis-latex/main.pdf` (75 páginas), sin referencias/citas indefinidas ni placeholders. La inspección visual de las páginas críticas pasó; quedan únicamente advertencias menores heredadas de maquetación del template y figuras previas.
+- La compilación anterior de `thesis-latex/main.pdf` tuvo 75 páginas. La revisión del 2026-09-10 la reemplaza por 76 páginas; no hay referencias/citas indefinidas, pero persisten avisos de maquetación heredados.
 
 ## Artefactos que no deben mezclarse
 
-- `exp1_robustez_v2.md/json`: corrida exploratoria previa con placeholders; el propio reporte la marca como no calibrada.
+- `exp1_robustez_v2.md/json`: corrida calibrada vigente con 15 políticas; los resultados anteriores con placeholders están en `exp1_robustez_v2_placeholders_legacy.md/json`.
 - `exp2_adversario_v2.json`: corrida completa actual, con huella de calibración y 90/90 celdas.
 - `benchmark_exploit_v2.json`: corrida titular completa con huella `1fd8464abb97`, 15 filas y 5 reinicios por terapia.
 - `exp2_adversario_v2_partial_legacy.json`: estado parcial antiguo, separado para conservar trazabilidad; no es citable.

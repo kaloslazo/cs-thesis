@@ -30,7 +30,7 @@ Sin tratar: 12 días
 - La comparación MAPPO--IPPO da `p=0.013759` en Wilcoxon pareado unilateral, pero
   sigue siendo evidencia del simulador, no eficacia clínica. La corrida histórica de
   `n=15` queda documentada como histórica y no debe mezclarse con esta auditoría.
-- **Framing honesto: retrasar, no curar.** Con la calibración real del GBM, la resistencia es inevitable bajo cualquier tratamiento (nadie llega al horizonte). El objetivo y la métrica miden *demora*, no reducción.
+- **Alcance:** en las trayectorias nominales auditadas se observó fracaso por carga o resistencia antes del horizonte. Esto no prueba inevitabilidad bajo cualquier tratamiento. El objetivo mide demora al primer fracaso definido por el simulador.
 - **Mecanismo candidato:** la política nominal usa dosis baja/intermitente compatible con preservar sensibles competidoras; esto es una interpretación del simulador, no una demostración clínica.
 - **CTDE vs IPPO:** con la métrica correcta MAPPO supera a IPPO en esta muestra de 15 pares; la diferencia sigue siendo evidencia del simulador, no eficacia clínica.
 - **Variabilidad:** el self-play puede caer en cuencas distintas según semilla. Reportar mediana, rango y tasa de éxito; no ocultar la dispersión con una sola mejor corrida.
@@ -43,9 +43,9 @@ Sin tratar: 12 días
 2. Describir como "CTDE con crítico centralizado por agente condicionado al estado conjunto, entrenado por self-play adversarial". NO "MAPPO cooperativo".
 3. **Un solo framework.** Implementación propia en PyTorch (referencia: CleanRL). PROHIBIDO el SB3 self-play alternado del código viejo (no es MARL).
 4. Entorno = PettingZoo `ParallelEnv`, 2 agentes (`"therapy"`, `"tumor"`).
-5. Estado dinámico real = **3-D** (S, R, c). Los genes GBM son contexto estático (condicionan params iniciales vía calibración), no evolucionan en el episodio.
+5. Estado dinámico real = **3-D** (S, R, c). DepMap identifica/filtra líneas y aporta expresión al dataset integrado, pero `calibrate.py` solo usa DRUG_NAME, ModelID, LN_IC50 y AUC. La versión actual no condiciona políticas ni parámetros por expresión génica individual.
 6. **Calibración:** la columna de datos `LN_IC50` deriva la *potencia* relativa del fármaco (IC50 de cada población, brecha S/R). El techo de muerte (`delta_max`) se ancla al crecimiento vía `KILL_TO_GROWTH_RATIO=2.0`, mientras que `delta_max_R` incorpora una eficacia resistente derivada de los datos con piso explícito. NO confundir esto con la recompensa del entorno (ver punto 9).
-7. La acción del Agente Tumor **debe estar acotada** (`phi_max`) con costo de fitness. Adversario sin restricción = hombre de paja. (Nota: el adversario resultó *débil* aun acotado — fortalecerlo es trabajo futuro abierto.)
+7. La acción del Agente Tumor **debe estar acotada** (`phi_max`) con costo de fitness. EXP-2 ya evaluó `phi_max={0.05,0.10,0.20}`; ampliar presupuestos y adversarios comunes sigue pendiente.
 8. **Objetivo = retrasar la intratabilidad, NO curar/reducir.** Minimizar carga es la trampa (es lo que hace MTD y por eso pierde). No premiar reducción de tumor.
 9. **Recompensa del entorno:** `+control_bonus` por día CONTROLADO (carga<prog_thr) **Y** TRATABLE (fracR<r_majority), menos `tox_weight·u`. El episodio termina si falla cualquiera. Params: `tox_weight=0.05`, `r_majority=0.50`, `control_bonus=1.0`, `progression_bonus=10`, `win_bonus=50`, `prog_thr=0.80·K`, `S0=0.40`, `R0=0.01`, `horizon=180`, `dt=0.1`, `phi_max=0.05`, `ent_coef=0.01`.
 10. **Métrica de evaluación = TTP-combinado** (`gbmarl/evalutils.py::ttp_combinado`): días hasta que falla carga O resistencia, reportando el modo de falla. Ver gotcha de métrica abajo.
@@ -103,6 +103,7 @@ cd thesis-latex && pdflatex -interaction=nonstopmode -halt-on-error main.tex
 ```
 
 ## Estado y pendientes
+- Revisión económica 2026-09-10: conclusiones/recomendaciones sincronizadas; referencia numérica en `thesis-code/configs/calibration_reference_20260908.json`; evaluación nominal exige calibración existente. Plan restante: `thesis-code/docs/plan_mejoras_pendientes.md`.
 - [✅] datos oficiales DepMap Public 26Q1 + GDSC2 release 8.5, cruce trazable y calibración reproducible.
 - [✅] simulador + entorno + PPO + MAPPO/IPPO + evaluación + métrica auditada + equivalencia FastTumorEnv/TumorEnv.
 - [✅] comparación nominal calibrada con 15 semillas por variante: MAPPO 34 d [27,41], IPPO 31 d [23,34].

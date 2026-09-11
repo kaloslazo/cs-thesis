@@ -5,9 +5,9 @@
 \begin{enumerate}
   \item \textbf{Conservar la validación multi-semilla como resultado principal.} La corrida nominal vigente usa 15 semillas por variante con huella de calibración fija, horizonte y endpoint explícitos. Para una conclusión más estrecha, añadir intervalos de confianza y más semillas sin reemplazar la mediana, el rango y los modos de falla.
 
-  \item \textbf{Completar EXP-2 de manera simétrica.} Reentrenar MAPPO e IPPO para $\phi_{\max}=0{,}10$ y $0{,}20$, incluir las mismas semillas y evaluar también las líneas base frente a adversarios comparables. La corrida actual de $0{,}05$ debe considerarse parcial hasta completar esas celdas.
+  \item \textbf{Evaluar frente a una población común de adversarios.} EXP-2 ya completó las 90 celdas previstas. La siguiente ampliación debe comparar MAPPO, IPPO y las líneas base frente a los mismos adversarios reservados para evaluación, además de los compañeros de self-play, para reducir la confusión entre la calidad de la terapia y la dificultad del tumor co-entrenado.
 
-  \item \textbf{Fortalecer la robustez adversarial.} Ejecutar el benchmark V2 con múltiples reinicios del adversario, incluir el compañero de self-play y realizar cross-play entre políticas. Una sola best-response aproximada no constituye un peor caso ni una prueba suficiente de seguridad.
+  \item \textbf{Ampliar la verificación del atacante.} El benchmark V2 ya incluye cinco reinicios por terapia, el compañero de self-play y cross-play. Una ampliación útil es medir la estabilidad del peor TTP encontrado al variar el presupuesto de entrenamiento y los reinicios; la mejor respuesta aproximada obtenida no garantiza un óptimo global.
 
   \item \textbf{Mejorar la calibración biológica.} Separar en el reporte qué parámetros provienen de datos, cuáles de literatura y cuáles de normalización. Cuando sea posible, incorporar curvas dosis--respuesta por línea, incertidumbre bootstrap, datos temporales de crecimiento y mediciones de eliminación del fármaco, en lugar de tratar la brecha de IC50 como identificación completa de la dinámica.
 

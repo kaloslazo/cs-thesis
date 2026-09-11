@@ -43,45 +43,45 @@ El sistema~\eqref{eq:ode-S}--\eqref{eq:ode-c} se integra numéricamente mediante
 \section{Calibración del simulador con datos reales}
 \label{sec:calibracion}
 
-La calibración separa estrictamente lo que proviene de los datos de lo que proviene de la literatura. El principio rector es que \emph{los datos determinan la potencia del fármaco} (la posición de las curvas dosis-respuesta y la brecha de sensibilidad entre poblaciones), mientras que \emph{la literatura ancla el techo de muerte y las tasas de crecimiento}.
+La calibración combina estadísticas de respuesta al fármaco con supuestos del simulador. Los datos determinan una escala de potencia relativa; el techo de muerte y las tasas de crecimiento no se estiman mediante un ajuste longitudinal en esta cohorte. La atribución de sus valores concretos a literatura requiere fuentes cuantitativas específicas.
 
 \subsection{Fuente y procesamiento de datos}
 
 Las concentraciones inhibitorias se derivan de los ensayos de sensibilidad a temozolomida en líneas celulares de glioblastoma del repositorio GDSC2~\cite{GDSC}, cruzados con la anotación genómica de DepMap~\cite{DepMap}. El cruce entre ambos repositorios es un punto crítico: las claves de identificación deben normalizarse en ambos lados (mayúsculas y eliminación de caracteres no alfanuméricos) antes del mapeo, pues un cruce ingenuo por nombre pierde líneas en silencio. Tras la corrección, se recuperan 34 líneas de glioblastoma con ensayos de sensibilidad y 24 con genómica completa, frente a las 6 que recuperaba la versión defectuosa del cruce. Este saneamiento se documenta reportando explícitamente cuántas líneas se recuperan y por qué se descarta cada una.
 
-De estos datos se estima la $\mathrm{IC50}$ de la población sensible y, a partir de la dispersión de respuestas, la $\mathrm{IC50}$ efectiva de la población resistente. El resultado es una brecha de sensibilidad de aproximadamente un orden de magnitud ($\mathrm{IC50}_R / \mathrm{IC50}_S \approx 9$), coherente con el carácter clínicamente refractario del glioblastoma a la temozolomida.
+Se promedia \texttt{LN\_IC50} por línea y se calculan los percentiles 10 y 90 de las 24 líneas con expresión completa. Las potencias relativas se definen como $\mathrm{IC50}_S=\exp(q_{10}-m)$ e $\mathrm{IC50}_R=\exp(q_{90}-m)$, donde $m$ es la mediana de \texttt{LN\_IC50}. Son magnitudes adimensionales y su razón es aproximadamente 9,1. Representar con esos extremos las poblaciones S/R es una hipótesis del simulador: los datos describen diferencias entre líneas, no subpoblaciones medidas dentro de un mismo tumor. El calibrador utiliza identificadores, nombre del fármaco, \texttt{LN\_IC50} y AUC; no utiliza las columnas de expresión para personalizar parámetros.
 
 \subsection{Procedencia de los parámetros}
 
-El techo de muerte $\delta_X^{\max}$ no se estima de datos \emph{in vitro} ---que no informan directamente la dinámica de competencia--- sino que se ancla a la literatura mediante una razón muerte-crecimiento, $\delta_S^{\max} = \kappa\, \alpha_S$ con $\kappa = 2{,}0$, garantizando que el fármaco disponga de palanca terapéutica suficiente. La Tabla~\ref{tab:procedencia} documenta la procedencia de cada parámetro, distinguiendo entre los derivados de \textbf{datos}, los anclados a \textbf{literatura}, y los fijados por \textbf{normalización} del modelo.
+El techo de muerte se fija mediante $\delta_S^{\max}=\kappa\alpha_S$, con $\kappa=2{,}0$. Para resistentes se utiliza una razón de eficacia derivada de percentiles de AUC, limitada al intervalo $[0{,}5,1]$. Tanto $\kappa$ como el piso 0,5 son elecciones de diseño cuya fuente cuantitativa específica queda pendiente de verificar. La condición $\alpha_S-\delta_S^{\max}<0$ comprueba el límite de saturación de la función de muerte; no demuestra por sí sola control a una dosis finita. La Tabla~\ref{tab:procedencia} distingue estadísticas de datos, supuestos y normalización.
 
 \begin{table}[H]
 \centering
-\caption{Procedencia de los parámetros del simulador. DATO: estimado de GDSC2/DepMap; LIT: anclado a literatura; NORM: fijado por normalización del modelo.}
+\caption{Procedencia de los parámetros. DATO: estadística de GDSC2 con asignación S/R asumida; SUP: supuesto cuyo valor cuantitativo requiere justificación adicional; NORM: normalización.}
 \label{tab:procedencia}
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{l|l|c|l}
 \textbf{Parámetro} & \textbf{Símbolo} & \textbf{Valor} & \textbf{Procedencia} \\
 \hline
-Crecimiento sensibles      & $\alpha_S$        & 0.15  & LIT \\
-Crecimiento resistentes    & $\alpha_R$        & 0.10  & LIT (costo de resistencia) \\
+Crecimiento sensibles      & $\alpha_S$        & 0.15  & SUP \\
+Crecimiento resistentes    & $\alpha_R$        & 0.10  & SUP (costo de resistencia) \\
 Capacidad de carga         & $K$               & 1.0   & NORM \\
-Eliminación del fármaco    & $\lambda_c$       & 0.40  & LIT \\
-Transición basal           & $\phi_{\text{base}}$ & 0.005 & LIT \\
+Eliminación del fármaco    & $\lambda_c$       & 0.40  & SUP \\
+Transición basal           & $\phi_{\text{base}}$ & 0.005 & SUP \\
 IC50 sensibles             & $\mathrm{IC50}_S$ & 0.36  & DATO (GDSC2) \\
 IC50 resistentes           & $\mathrm{IC50}_R$ & 3.27  & DATO (GDSC2) \\
-Coeficiente de Hill        & $h$               & 2.0   & LIT \\
-Muerte máx.\ sensibles     & $\delta_S^{\max}$ & 0.30  & LIT (anclada, $\kappa\,\alpha_S$) \\
-Muerte máx.\ resistentes   & $\delta_R^{\max}$ & 0.15  & LIT (anclada) \\
+Coeficiente de Hill        & $h$               & 2.0   & SUP \\
+Muerte máx.\ sensibles     & $\delta_S^{\max}$ & 0.30  & SUP ($\kappa\,\alpha_S$) \\
+Muerte máx.\ resistentes   & $\delta_R^{\max}$ & 0.15  & DATO + SUP (piso 0,5) \\
 \end{tabular}
 \end{table}
 
-Toda fórmula que transforma un dato en un parámetro de la EDO queda documentada de forma explícita, sin constantes mágicas sin derivación. Un hallazgo honesto de la calibración es que la temozolomida resulta un fármaco débil \emph{in vitro}, lo cual refleja fielmente la realidad clínica del glioblastoma como enfermedad incurable.
+Esta parametrización permite reproducir un escenario computacional. Su conexión con dosis administradas y tiempos clínicos exige validar las escalas de concentración y tiempo, además de la dinámica longitudinal. Los días reportados son días del simulador bajo los parámetros especificados.
 
 \section{Formulación como juego adversarial multiagente}
 \label{sec:juego}
 
-El problema de decisión se formula como un entorno multiagente paralelo siguiendo la interfaz \texttt{ParallelEnv} de PettingZoo~\cite{Terry2021}, con dos agentes que actúan de manera simultánea sobre el sistema~\eqref{eq:ode-S}--\eqref{eq:ode-c}. El estado dinámico real del sistema es tridimensional, $s = (S, R, c)$; los descriptores genómicos de la línea celular condicionan los parámetros iniciales a través de la calibración, pero no evolucionan durante el episodio.
+El problema de decisión se formula como un entorno multiagente paralelo siguiendo la interfaz \texttt{ParallelEnv} de PettingZoo~\cite{Terry2021}, con dos agentes que actúan de manera simultánea sobre el sistema~\eqref{eq:ode-S}--\eqref{eq:ode-c}. El estado dinámico real es tridimensional, $s=(S,R,c)$. La calibración vigente es agregada y compartida entre episodios; la expresión génica no condiciona actualmente los parámetros iniciales ni las políticas.
 
 \subsection{Observabilidad parcial}
 
@@ -229,7 +229,7 @@ La Tabla~\ref{tab:pipeline} explicita, para cada fase, su propósito, su víncul
 \textbf{Fase} & \textbf{Propósito} & \textbf{Vínculo con el objetivo y contribución} \\
 \hline
 1. Datos (GDSC2 + DepMap) & Recuperar líneas de glioblastoma con sensibilidad a temozolomida. & Anclan la dinámica a la biología real (brecha S:R $\approx 9\times$); sin ellos la resistencia sería un supuesto arbitrario. \\
-2. Calibración & Derivar IC50 y forma de Hill de los datos; anclar el resto a literatura. & Fija la \emph{potencia} del fármaco con la que se mide cuánto se puede retrasar la progresión; separa dato de supuesto. \\
+2. Calibración & Derivar IC50 relativa de datos; declarar Hill y tasas como supuestos. & Fija la \emph{potencia} relativa y documenta los supuestos del simulador. \\
 3. Tests del simulador & Probar la EDO/RK4 de forma aislada (10/10 pruebas). & Garantiza que la dinámica conserva masa y es biológicamente válida antes de aprender sobre ella. \\
 4. PPO single-agent & De-riskear el entorno: ¿es aprendible contra un tumor fijo? & Verifica que la señal de recompensa induce control \emph{antes} de añadir el adversario; aísla fallos del entorno de fallos del MARL. \\
 5. MAPPO self-play (CTDE) & Entrenar el modelo titular: terapia y tumor co-evolucionan. & Produce la política adaptativa que maximiza el tiempo de manejo; es la contribución central. \\

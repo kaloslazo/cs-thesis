@@ -2,7 +2,8 @@
 evalutils.py — Métrica de evaluación CORRECTA y baselines, en un solo lugar.
 
 TTP-combinado: días hasta que el tumor deja de estar controlado (carga<umbral)
-Y tratable (fracR<mayoría) — lo que falle primero. Es el desenlace clínico real.
+Y tratable (fracR<mayoría) — lo que falle primero. Es un endpoint operacional
+del simulador; su equivalencia con un desenlace clínico no está validada.
 NO confundir con la métrica vieja (solo-resistencia), que reportaba el horizonte
 cuando la falla era por carga, inflando falsamente los resultados.
 """
