@@ -1,0 +1,47 @@
+name: Sync thesis LaTeX to Overleaf
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "thesis-latex/**"
+  workflow_dispatch:
+
+# Prevent two pushes from uploading to the same Overleaf project at once.
+concurrency:
+  group: overleaf-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Upload thesis-latex to Overleaf
+        env:
+          # Add these in Settings -> Secrets and variables -> Actions.
+          OVERLEAF_SESSION: ${{ secrets.OVERLEAF_SESSION }}
+          OVERLEAF_PROJECT_ID: ${{ secrets.OVERLEAF_PROJECT_ID }}
+        run: |
+          test -n "$OVERLEAF_SESSION" || {
+            echo "Missing OVERLEAF_SESSION repository secret"
+            exit 1
+          }
+          test -n "$OVERLEAF_PROJECT_ID" || {
+            echo "Missing OVERLEAF_PROJECT_ID repository secret"
+            exit 1
+          }
+
+          # This uses Overleaf's web upload endpoints through olcli because
+          # native GitHub Sync is not available on the free Overleaf plan.
+          npx --yes @aloth/olcli@0.13.0 push thesis-latex \
+            --project "$OVERLEAF_PROJECT_ID" \
+            --all
